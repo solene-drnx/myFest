@@ -10,6 +10,7 @@ import montserratMedium from "./assets/fonts/montserrat_medium.ttf";
 import { useFonts } from 'expo-font';
 import iconCroix from "./assets/iconCroix.png";
 import iconCoeur from "./assets/iconCoeur.png";
+import { CardScreen } from './screens/card/CardScreen';
 
 export default function App() {
   const [isFontLoaded] = useFonts({
@@ -22,42 +23,7 @@ export default function App() {
     switch (navSelectionne) {
       case "card":
         return (
-          <View style={style.container_section_card}>
-            <View style={style.container_swiper}>
-              <Swiper
-                cards={ARTISTS}
-                renderCard={(artist) => (
-                  <ImageBackground source={artist.image} imageStyle={style.imageBackground}>
-                    <View style={style.card}>
-                      <Text style={style.textCard}>{artist.nom}</Text>
-                      <Text style={style.taglineCard}>{artist.genre.join(' - ')}</Text>
-                    </View>
-                  </ImageBackground>
-                )}
-                onSwiped={(cardIndex) => {console.log(cardIndex)}}
-                onSwipedAll={() => {console.log('onSwipedAll')}}
-                cardIndex={0}
-                stackSize={3}
-                overlayLabels={{
-
-                }}
-              />
-            </View>
-            <View style={style.container_boutons}>
-              <TouchableOpacity>
-                <Text style={style.smileyBoutonCard} >🤔</Text>
-              </TouchableOpacity>
-              <TouchableOpacity>
-                <Image style={style.iconBoutonCard} source={iconCroix}/>
-              </TouchableOpacity>
-              <TouchableOpacity>
-                <Image style={style.iconBoutonCard} source={iconCoeur}/>
-              </TouchableOpacity>
-              <TouchableOpacity>
-                <Text style={style.smileyBoutonCard} >🤩</Text>
-              </TouchableOpacity>
-            </View>
-          </View>
+          <CardScreen></CardScreen>
         );
       case "planning":
         return <Text>Ceci est l'écran de planning</Text>;
