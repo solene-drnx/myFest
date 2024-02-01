@@ -5,20 +5,21 @@ import TinderCard from "../../components/TinderCard/TinderCard";
 import iconCroix from "../../assets/iconCroix.png";
 import iconCoeur from "../../assets/iconCoeur.png";
 
-export function CardScreen() {
+export function CardScreen({ indexCard, setIndexCard, setArtists }) {
     const [data, setData] = useState(ARTISTS);
-    const [artists, setArtists] = useState(ARTISTS);
 
     useEffect(() => {
-        if (!data.length) {
+        console.log(indexCard);
+        if (indexCard===21) {
             setData(ARTISTS);
+            setIndexCard(0);
         }
-    }, [data]);
-
+    }, [indexCard]);
+    
     const updateScore = (artistName, increment) => {
         setArtists(currentArtists =>
             currentArtists.map(artist => {
-                console.log(artist.nom + artist.score); 
+                console.log(artist.nom + artist.score);
                 return artist.nom === artistName ? { ...artist, score: increment } : artist;
             })
         );
@@ -32,16 +33,16 @@ export function CardScreen() {
         },
         onPanResponderRelease: (_, { dx, dy }) => {
             let isActionActive = Math.abs(dx) > 200;
-        
+
             const onSwipeComplete = () => {
                 if (dx > 0) {
-                    updateScore(data[0].nom, 1);
+                    updateScore(data[indexCard].nom, 1);
                 } else {
-                    updateScore(data[0].nom, -1);
+                    updateScore(data[indexCard].nom, -1);
                 }
                 removeCard();
             };
-        
+
             if (isActionActive) {
                 Animated.timing(swipe, {
                     toValue: { x: 500 * dx, y: dy },
@@ -57,14 +58,17 @@ export function CardScreen() {
                 }).start();
             }
         }
-        
+
     });
 
     const removeCard = useCallback(() => {
-        setData(prepState => prepState.slice(1));
+        setIndexCard(prevIndex => prevIndex + 1);
         swipe.setValue({ x: 0, y: 0 });
-    }, [swipe]);
+    }, [setData, setIndexCard, swipe, indexCard]); 
     
+
+    
+
     const swipeLeft = () => {
         Animated.timing(swipe, {
             toValue: { x: -500, y: 0 },
@@ -72,7 +76,7 @@ export function CardScreen() {
             duration: 500,
         }).start(() => {
             removeCard();
-            updateScore(data[0].nom, -1);
+            updateScore(data[indexCard].nom, -1);
         });
     };
 
@@ -83,7 +87,7 @@ export function CardScreen() {
             duration: 500,
         }).start(() => {
             removeCard();
-            updateScore(data[0].nom, 1);
+            updateScore(data[indexCard].nom, 1);
         });
     };
 
@@ -94,7 +98,7 @@ export function CardScreen() {
             duration: 500,
         }).start(() => {
             removeCard();
-            updateScore(data[0].nom, 4);
+            updateScore(data[indexCard].nom, 4);
         });
     };
 
@@ -105,17 +109,17 @@ export function CardScreen() {
             duration: 500,
         }).start(() => {
             removeCard();
-            updateScore(data[0].nom, 0);
+            updateScore(data[indexCard].nom, 0);
         });
     };
 
 
     return (
         <View style={{ flex: 1 }}>
-            {data.map((item, index) => {
+            {data.slice(indexCard).map((item, index) => {
                 let isFirst = index === 0;
                 let dragHandlers = isFirst ? panResponser.panHandlers : {};
-                return <TinderCard item={item} isFirst={isFirst} swipe={swipe} {...dragHandlers}/>;
+                return <TinderCard item={item} isFirst={isFirst} swipe={swipe} {...dragHandlers} />;
             }).reverse()}
             <View style={{ width: "100%", position: "absolute", bottom: 15, flexDirection: "row", justifyContent: "space-evenly" }}>
                 <TouchableOpacity onPress={() => { swipeDown(); }}>

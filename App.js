@@ -8,6 +8,7 @@ import montserratMedium from "./assets/fonts/montserrat_medium.ttf";
 import { useFonts } from 'expo-font';
 import { CardScreen } from './screens/card/CardScreen';
 import { PlanningScreen } from './screens/planning/PlanningScreen';
+import { ARTISTS } from './constant';
 
 export default function App() {
   const [isFontLoaded] = useFonts({
@@ -15,16 +16,18 @@ export default function App() {
     "Montserrat-Medium" : montserratMedium,
   });
   const [navSelectionne, setNavSelectionne] = useState("card");
+  const [artists, setArtists] = useState(ARTISTS);
+  const [indexCard, setIndexCard] = useState(0);
 
   const gestionDesScreens = () => {
     switch (navSelectionne) {
       case "card":
         return (
-          <CardScreen></CardScreen>
+          <CardScreen indexCard={indexCard} setIndexCard={setIndexCard} setArtists={setArtists}></CardScreen>
         );
       case "planning":
         return (
-          <PlanningScreen></PlanningScreen>
+          <PlanningScreen artists={artists}></PlanningScreen>
         );
       default:
         return <Text>Ceci est l'écran de profil</Text>;

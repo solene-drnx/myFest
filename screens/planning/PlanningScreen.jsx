@@ -2,11 +2,10 @@ import { ScrollView, Text, TouchableOpacity, View } from "react-native";
 import { useState, useEffect } from "react";
 import { style } from "./PlanningScreen_style";
 import { CardCalendar } from "../../components/CardCalendar/CardCalendar";
-import { ARTISTS } from "../../constant";
 import { CardRepas } from "../../components/CardCalendar/CardRepas";
 import { CardDodo } from "../../components/CardCalendar/CardDodo";
 
-export function PlanningScreen() {
+export function PlanningScreen({artists}) {
     const [dateSelected, setDateSelected] = useState("jour1");
 
     // Fonction pour gérer l'affichage en fonction de la date sélectionnée
@@ -14,8 +13,8 @@ export function PlanningScreen() {
         switch (dateSelected) {
             case "jour1":
                 const artistCards = [];
-                for (let i = 0; i < ARTISTS.length; i++) {
-                    artistCards.push(<CardCalendar key={i} artist={ARTISTS[i]} />);
+                for (let i = 0; i < artists.length; i++) {
+                    artistCards.push(<CardCalendar key={i} artist={artists[i]} />);
                 }
 
                 return (
