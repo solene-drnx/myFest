@@ -57,6 +57,7 @@ const TinderCard = ({ item, isFirst, swipe, ...rest }) => {
                 position: "absolute",
                 top: 20,
                 borderRadius: 20,
+                zIndex: 2,
             }, isFirst && {transform: [...swipe.getTranslateTransform(), {rotate: rotate}]}]} {...rest}>
             <Image source={item.image} style={{ width: "100%", height: "100%", borderRadius: 20 }} />
             <View style={{width:"100%", height:"100%", borderRadius: 20, position: "absolute"}}>

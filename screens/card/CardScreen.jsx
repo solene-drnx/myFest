@@ -1,4 +1,3 @@
-import { style } from "./cardScreen_style";
 import { Animated, Text, View, PanResponder, TouchableOpacity, Image } from "react-native";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { ARTISTS, LIEUX, GENRES } from '../../constant';
@@ -56,6 +55,14 @@ export function CardScreen() {
         }).start(removeCard);
     }, [removeCard]);
 
+    const handleSwipeUp = useCallback((direction) => {
+        Animated.timing(swipe, {
+            toValue: { x: 0, y: direction * 500 }, // Animer vers le haut
+            useNativeDriver: true,
+            duration: 500,
+        }).start(removeCard);
+    }, [removeCard]);
+
     return (
         <View style={{ flex: 1 }}>
             {data.map((item, index) => {
@@ -64,7 +71,7 @@ export function CardScreen() {
                 return <TinderCard item={item} isFirst={isFirst} swipe={swipe} {...dragHandlers} />;
             }).reverse()}
             <View style={{ width: "100%", position: "absolute", bottom: 15, flexDirection: "row", justifyContent: "space-evenly" }}>
-                <TouchableOpacity>
+                <TouchableOpacity onPress={()=>{handleSwipeUp(1);}}>
                     <Text style={{fontSize: 50}} >🤔</Text>
                 </TouchableOpacity>
                 <TouchableOpacity onPress={()=>{handelSelection(-1);}}>
@@ -73,9 +80,9 @@ export function CardScreen() {
                 <TouchableOpacity onPress={()=>{handelSelection(1);}}>
                     <Image style={{width: 70, height: 70}} source={iconCoeur} />
                 </TouchableOpacity>
-                <TouchableOpacity>
+                <TouchableOpacity onPress={()=>{handleSwipeUp(-1);}}>
                     <Text style={{fontSize: 50}} >🤩</Text>
-                </TouchableOpacity>
+                </TouchableOpacity> 
             </View>
         </View>
     );

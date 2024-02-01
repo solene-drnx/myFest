@@ -3,14 +3,11 @@ import { useState } from "react";
 import { style } from './App_style';
 import { SafeAreaProvider, SafeAreaView } from 'react-native-safe-area-context';
 import { NavigationMenu } from './components/NavigationMenu/NavigationMenu';
-import Swiper from 'react-native-deck-swiper';
-import { ARTISTS, LIEUX, GENRES } from './constant';
 import montserratBlack from "./assets/fonts/montserrat_black.ttf";
 import montserratMedium from "./assets/fonts/montserrat_medium.ttf";
 import { useFonts } from 'expo-font';
-import iconCroix from "./assets/iconCroix.png";
-import iconCoeur from "./assets/iconCoeur.png";
 import { CardScreen } from './screens/card/CardScreen';
+import { PlanningScreen } from './screens/planning/PlanningScreen';
 
 export default function App() {
   const [isFontLoaded] = useFonts({
@@ -26,7 +23,9 @@ export default function App() {
           <CardScreen></CardScreen>
         );
       case "planning":
-        return <Text>Ceci est l'écran de planning</Text>;
+        return (
+          <PlanningScreen></PlanningScreen>
+        );
       default:
         return <Text>Ceci est l'écran de profil</Text>;
     }
