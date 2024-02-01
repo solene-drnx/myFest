@@ -7,12 +7,22 @@ import iconCoeur from "../../assets/iconCoeur.png";
 
 export function CardScreen() {
     const [data, setData] = useState(ARTISTS);
+    const [artists, setArtists] = useState(ARTISTS);
 
     useEffect(() => {
         if (!data.length) {
             setData(ARTISTS);
         }
     }, [data]);
+
+    const updateScore = (artistName, increment) => {
+        setArtists(currentArtists =>
+            currentArtists.map(artist => {
+                console.log(artist.nom + artist.score); 
+                return artist.nom === artistName ? { ...artist, score: increment } : artist;
+            })
+        );
+    };
 
     const swipe = useRef(new Animated.ValueXY()).current;
     const panResponser = PanResponder.create({
@@ -46,22 +56,51 @@ export function CardScreen() {
         setData(prepState => prepState.slice(1));
         swipe.setValue({ x: 0, y: 0 });
     }, [swipe]);
-
-    const handelSelection = useCallback((direction) => {
+    
+    const swipeLeft = () => {
         Animated.timing(swipe, {
-            toValue: { x: direction * 500, y: 0 },
+            toValue: { x: -500, y: 0 },
             useNativeDriver: true,
             duration: 500,
-        }).start(removeCard);
-    }, [removeCard]);
+        }).start(() => {
+            removeCard();
+            updateScore(data[0].nom, -1);
+        });
+    };
 
-    const handleSwipeUp = useCallback((direction) => {
+    const swipeRight = () => {
         Animated.timing(swipe, {
-            toValue: { x: 0, y: direction * 500 }, // Animer vers le haut
+            toValue: { x: 500, y: 0 },
             useNativeDriver: true,
             duration: 500,
-        }).start(removeCard);
-    }, [removeCard]);
+        }).start(() => {
+            removeCard();
+            updateScore(data[0].nom, 1);
+        });
+    };
+
+    const swipeUp = () => {
+        Animated.timing(swipe, {
+            toValue: { x: 0, y: -500 },
+            useNativeDriver: true,
+            duration: 500,
+        }).start(() => {
+            removeCard();
+            updateScore(data[0].nom, 4);
+        });
+    };
+
+    const swipeDown = () => {
+        Animated.timing(swipe, {
+            toValue: { x: 0, y: 500 },
+            useNativeDriver: true,
+            duration: 500,
+        }).start(() => {
+            removeCard();
+            updateScore(data[0].nom, 0);
+        });
+    };
+
 
     return (
         <View style={{ flex: 1 }}>
@@ -71,18 +110,18 @@ export function CardScreen() {
                 return <TinderCard item={item} isFirst={isFirst} swipe={swipe} {...dragHandlers} />;
             }).reverse()}
             <View style={{ width: "100%", position: "absolute", bottom: 15, flexDirection: "row", justifyContent: "space-evenly" }}>
-                <TouchableOpacity onPress={()=>{handleSwipeUp(1);}}>
-                    <Text style={{fontSize: 50}} >🤔</Text>
+                <TouchableOpacity onPress={() => { swipeDown(); }}>
+                    <Text style={{ fontSize: 50 }} >🤔</Text>
                 </TouchableOpacity>
-                <TouchableOpacity onPress={()=>{handelSelection(-1);}}>
-                    <Image style={{width: 70, height: 70}} source={iconCroix} />
+                <TouchableOpacity onPress={() => { swipeLeft(); }}>
+                    <Image style={{ width: 70, height: 70 }} source={iconCroix} />
                 </TouchableOpacity>
-                <TouchableOpacity onPress={()=>{handelSelection(1);}}>
-                    <Image style={{width: 70, height: 70}} source={iconCoeur} />
+                <TouchableOpacity onPress={() => { swipeRight(); }}>
+                    <Image style={{ width: 70, height: 70 }} source={iconCoeur} />
                 </TouchableOpacity>
-                <TouchableOpacity onPress={()=>{handleSwipeUp(-1);}}>
-                    <Text style={{fontSize: 50}} >🤩</Text>
-                </TouchableOpacity> 
+                <TouchableOpacity onPress={() => { swipeUp(); }}>
+                    <Text style={{ fontSize: 50 }} >🤩</Text>
+                </TouchableOpacity>
             </View>
         </View>
     );
