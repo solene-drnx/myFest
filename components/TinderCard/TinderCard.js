@@ -1,6 +1,5 @@
 import { View, Text, Image, Dimensions, Animated } from "react-native";
 import React, { useCallback } from "react";
-import LinearGradient from "react-native-linear-gradient";
 import TinderChoice from "../TinderChoice/TinderChoice";
 
 const { height, width } = Dimensions.get('window')

@@ -28,19 +28,26 @@ export function CardScreen() {
     const panResponser = PanResponder.create({
         onMoveShouldSetPanResponder: () => true,
         onPanResponderMove: (_, { dx, dy }) => {
-            console.log("dx:" + dx + " dy:" + dy);
             swipe.setValue({ x: dx, y: dy });
         },
         onPanResponderRelease: (_, { dx, dy }) => {
-            console.log("released:" + " dx:" + dx + " dy:" + dy);
-            let direction = Math.sign(dx);
             let isActionActive = Math.abs(dx) > 200;
+        
+            const onSwipeComplete = () => {
+                if (dx > 0) {
+                    updateScore(data[0].nom, 1);
+                } else {
+                    updateScore(data[0].nom, -1);
+                }
+                removeCard();
+            };
+        
             if (isActionActive) {
                 Animated.timing(swipe, {
                     toValue: { x: 500 * dx, y: dy },
                     useNativeDriver: true,
                     duration: 500,
-                }).start(removeCard);
+                }).start(onSwipeComplete);
             } else {
                 Animated.spring(swipe, {
                     toValue: { x: 0, y: 0 },
@@ -50,6 +57,7 @@ export function CardScreen() {
                 }).start();
             }
         }
+        
     });
 
     const removeCard = useCallback(() => {
@@ -107,7 +115,7 @@ export function CardScreen() {
             {data.map((item, index) => {
                 let isFirst = index === 0;
                 let dragHandlers = isFirst ? panResponser.panHandlers : {};
-                return <TinderCard item={item} isFirst={isFirst} swipe={swipe} {...dragHandlers} />;
+                return <TinderCard item={item} isFirst={isFirst} swipe={swipe} {...dragHandlers}/>;
             }).reverse()}
             <View style={{ width: "100%", position: "absolute", bottom: 15, flexDirection: "row", justifyContent: "space-evenly" }}>
                 <TouchableOpacity onPress={() => { swipeDown(); }}>
