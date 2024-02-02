@@ -5,7 +5,7 @@ import TinderCard from "../../components/TinderCard/TinderCard";
 import iconCroix from "../../assets/iconCroix.png";
 import iconCoeur from "../../assets/iconCoeur.png";
 
-export function CardScreen({ indexCard, setIndexCard, setArtists }) {
+export function CardScreen({ indexCard, setIndexCard, setArtists, setGenreFav }) {
     const [data, setData] = useState(ARTISTS);
 
     useEffect(() => {
@@ -67,6 +67,20 @@ export function CardScreen({ indexCard, setIndexCard, setArtists }) {
     }, [setData, setIndexCard, swipe, indexCard]); 
     
 
+    const ajoutGenre = (artistGenres, increment) => {
+        setGenreFav(currentGenres => {
+            const updatedGenres = { ...currentGenres };
+            artistGenres.forEach(genre => {
+                if (updatedGenres[genre]) {
+                    updatedGenres[genre] += increment; // Incrémente si le genre existe déjà
+                } else {
+                    updatedGenres[genre] = increment; // Initialise à 1 si le genre n'existe pas
+                }
+            });
+            console.log(updatedGenres);
+            return updatedGenres;
+        });
+    };
     
 
     const swipeLeft = () => {
@@ -77,6 +91,7 @@ export function CardScreen({ indexCard, setIndexCard, setArtists }) {
         }).start(() => {
             removeCard();
             updateScore(data[indexCard].nom, -1);
+            ajoutGenre(data[indexCard].genre, -1);
         });
     };
 
@@ -88,6 +103,7 @@ export function CardScreen({ indexCard, setIndexCard, setArtists }) {
         }).start(() => {
             removeCard();
             updateScore(data[indexCard].nom, 1);
+            ajoutGenre(data[indexCard].genre, 1); // Assurez-vous que data[indexCard].genres est un tableau
         });
     };
 
@@ -99,6 +115,7 @@ export function CardScreen({ indexCard, setIndexCard, setArtists }) {
         }).start(() => {
             removeCard();
             updateScore(data[indexCard].nom, 4);
+            ajoutGenre(data[indexCard].genre, 4); // Assurez-vous que data[indexCard].genres est un tableau
         });
     };
 
@@ -110,6 +127,7 @@ export function CardScreen({ indexCard, setIndexCard, setArtists }) {
         }).start(() => {
             removeCard();
             updateScore(data[indexCard].nom, 0);
+            ajoutGenre(data[indexCard].genre, 0);
         });
     };
 

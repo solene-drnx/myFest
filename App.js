@@ -8,7 +8,7 @@ import montserratMedium from "./assets/fonts/montserrat_medium.ttf";
 import { useFonts } from 'expo-font';
 import { CardScreen } from './screens/card/CardScreen';
 import { PlanningScreen } from './screens/planning/PlanningScreen';
-import { ARTISTS } from './constant';
+import { ARTISTS, FAV_GENRES_INIT } from './constant';
 
 export default function App() {
   const [isFontLoaded] = useFonts({
@@ -18,12 +18,13 @@ export default function App() {
   const [navSelectionne, setNavSelectionne] = useState("card");
   const [artists, setArtists] = useState(ARTISTS);
   const [indexCard, setIndexCard] = useState(0);
+  const [genresFav, setGenreFav] = useState(FAV_GENRES_INIT);
 
   const gestionDesScreens = () => {
     switch (navSelectionne) {
       case "card":
         return (
-          <CardScreen indexCard={indexCard} setIndexCard={setIndexCard} setArtists={setArtists}></CardScreen>
+          <CardScreen indexCard={indexCard} setIndexCard={setIndexCard} setArtists={setArtists} setGenreFav={setGenreFav}></CardScreen>
         );
       case "planning":
         return (

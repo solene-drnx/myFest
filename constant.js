@@ -58,7 +58,7 @@ export const GENRES = {
     worldBeat: "Worldbeat",
     reggae: "Reggae",
     trap: "Trap",
-    hipHop: "Hip-Hop",
+    hipHop: "HipHop",
     country: "Country",
     gabber: "Gabber",
     techno: "Techno",
@@ -67,9 +67,31 @@ export const GENRES = {
     house: "House",
     soul: "Soul",
     funk: "Funk",
-    indiePop: "Indie-Pop",
-    synthPop: "Synth-Pop"
+    indiePop: "IndiePop",
+    synthPop: "SynthPop"
 }
+
+export const FAV_GENRES_INIT = {
+    Pop: 0,
+    Rock: 0,
+    Rap: 0,
+    Classique: 0,
+    Drill: 0,
+    Worldbeat: 0,
+    Reggae: 0,
+    Trap: 0,
+    HipHop: 0,
+    Country: 0,
+    Gabber: 0,
+    Techno: 0,
+    Hyperpop: 0,
+    Électro: 0,
+    House: 0,
+    Soul: 0,
+    Funk: 0,
+    IndiePop: 0,
+    SynthPop: 0,
+};
 
 export const ARTISTS = [
     { nom: "JULIETTE ARMANET", debut: {heure: 22, minute: 0}, fin: {heure: 23, minute: 0}, lieu: LIEUX.paris, genre: [GENRES.pop, GENRES.rock], image: julietteArmanetImg, imageCalendar: julietteArmanetCalendar, score: 0 },

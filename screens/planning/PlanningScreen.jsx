@@ -9,7 +9,7 @@ export function PlanningScreen({ artists }) {
     const [dateSelected, setDateSelected] = useState("jour1");
     let artistsSorted = artists;
 
-    function filterArtistsByHighestScore(artists) {
+    function triArtistParScore(artists) {
         const sortedArtists = artists.sort((a, b) => {
             const minutesA = (a.debut.heure >= 6 ? a.debut.heure : a.debut.heure + 24) * 60 + a.debut.minute;
             const minutesB = (b.debut.heure >= 6 ? b.debut.heure : b.debut.heure + 24) * 60 + b.debut.minute;
@@ -33,10 +33,15 @@ export function PlanningScreen({ artists }) {
         }, []);
     }
 
+    function supprimeArtistScoreNegatif(artists) {
+        return artists.filter(artist => artist.score >= 0);
+    }
+    
+
     const renderContentBasedOnDate = () => {
         switch (dateSelected) {
             case "jour1":
-                const sortedArtists = filterArtistsByHighestScore(artistsSorted);
+                const sortedArtists = supprimeArtistScoreNegatif(triArtistParScore(artistsSorted));
                 const artistCards = sortedArtists.map((artist, i) => (
                     <CardCalendar key={i} artist={artist} />
                 ));
