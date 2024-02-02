@@ -5,30 +5,54 @@ import { CardCalendar } from "../../components/CardCalendar/CardCalendar";
 import { CardRepas } from "../../components/CardCalendar/CardRepas";
 import { CardDodo } from "../../components/CardCalendar/CardDodo";
 
-export function PlanningScreen({artists}) {
+export function PlanningScreen({ artists }) {
     const [dateSelected, setDateSelected] = useState("jour1");
+    let artistsSorted = artists;
 
-    // Fonction pour gérer l'affichage en fonction de la date sélectionnée
+    function filterArtistsByHighestScore(artists) {
+        const sortedArtists = artists.sort((a, b) => {
+            const minutesA = (a.debut.heure >= 6 ? a.debut.heure : a.debut.heure + 24) * 60 + a.debut.minute;
+            const minutesB = (b.debut.heure >= 6 ? b.debut.heure : b.debut.heure + 24) * 60 + b.debut.minute;
+
+            return minutesA - minutesB;
+        });
+
+        return sortedArtists.reduce((acc, current) => {
+            // Si current.score est égal à -1, on ne fait rien et on retourne acc pour passer à l'itération suivante
+            if (current.score === -1) {
+                return acc;
+            }
+        
+            const last = acc[acc.length - 1];
+            if (!last || last.debut.heure !== current.debut.heure || last.debut.minute !== current.debut.minute || last.score === current.score) {
+                acc.push(current);
+            } else if (last.score < current.score) {
+                acc[acc.length - 1] = current;
+            }
+            return acc;
+        }, []);
+    }
+
     const renderContentBasedOnDate = () => {
         switch (dateSelected) {
             case "jour1":
-                const artistCards = [];
-                for (let i = 0; i < artists.length; i++) {
-                    artistCards.push(<CardCalendar key={i} artist={artists[i]} />);
-                }
+                const sortedArtists = filterArtistsByHighestScore(artistsSorted);
+                const artistCards = sortedArtists.map((artist, i) => (
+                    <CardCalendar key={i} artist={artist} />
+                ));
 
                 return (
-                    <View style={{ alignItems: "center", marginTop: 20}}>
+                    <View style={{ alignItems: "center", marginTop: 20 }}>
                         <ScrollView>
-                            <CardRepas/>
-                            <CardDodo/>
+                            <CardRepas />
                             {artistCards}
+                            <CardDodo />
                         </ScrollView>
                     </View>
                 );
             case "jour2":
                 return <Text>Jour2</Text>;
-            default: 
+            default:
                 return <Text>Jour3</Text>;
         }
     };
