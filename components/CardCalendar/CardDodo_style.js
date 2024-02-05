@@ -13,6 +13,7 @@ export const style = StyleSheet.create({
         justifyContent: "space-between",
         borderRadius: 10,
         margin: 5,
+        marginBottom: 100,
     },
     image_calendar: {
         width: 150,

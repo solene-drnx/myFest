@@ -9,8 +9,7 @@ export function CardScreen({ indexCard, setIndexCard, setArtists, setGenreFav })
     const [data, setData] = useState(ARTISTS);
 
     useEffect(() => {
-        console.log(indexCard);
-        if (indexCard===21) {
+        if (indexCard===61) {
             setData(ARTISTS);
             setIndexCard(0);
         }
@@ -19,7 +18,6 @@ export function CardScreen({ indexCard, setIndexCard, setArtists, setGenreFav })
     const updateScore = (artistName, increment) => {
         setArtists(currentArtists =>
             currentArtists.map(artist => {
-                console.log(artist.nom + artist.score);
                 return artist.nom === artistName ? { ...artist, score: increment } : artist;
             })
         );
@@ -77,7 +75,6 @@ export function CardScreen({ indexCard, setIndexCard, setArtists, setGenreFav })
                     updatedGenres[genre] = increment; // Initialise à 1 si le genre n'existe pas
                 }
             });
-            console.log(updatedGenres);
             return updatedGenres;
         });
     };

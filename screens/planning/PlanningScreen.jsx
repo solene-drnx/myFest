@@ -5,9 +5,17 @@ import { CardCalendar } from "../../components/CardCalendar/CardCalendar";
 import { CardRepas } from "../../components/CardCalendar/CardRepas";
 import { CardDodo } from "../../components/CardCalendar/CardDodo";
 
-export function PlanningScreen({ artists }) {
+export function PlanningScreen({ artists, genresFav }) {
     const [dateSelected, setDateSelected] = useState("jour1");
     let artistsSorted = artists;
+
+    function choisirCarteSurGenres(cardA, cardB, genreFav) {
+        const scoreA = cardA.genre.reduce((acc, genre) => acc + (genreFav[genre] || 0), 0) / cardA.genre.length;
+        const scoreB = cardB.genre.reduce((acc, genre) => acc + (genreFav[genre] || 0), 0) / cardB.genre.length;
+        console.log(cardA.nom + scoreA);
+        console.log(cardB.nom + scoreB);
+        return scoreA >= scoreB ? cardA : cardB;
+    }
 
     function triArtistParScore(artists) {
         const sortedArtists = artists.sort((a, b) => {
@@ -17,20 +25,25 @@ export function PlanningScreen({ artists }) {
             return minutesA - minutesB;
         });
 
-        return sortedArtists.reduce((acc, current) => {
+        return sortedArtists.reduce((acc, current, index, array) => {
             // Si current.score est égal à -1, on ne fait rien et on retourne acc pour passer à l'itération suivante
             if (current.score === -1) {
                 return acc;
             }
         
             const last = acc[acc.length - 1];
-            if (!last || last.debut.heure !== current.debut.heure || last.debut.minute !== current.debut.minute || last.score === current.score) {
+            // Vérifier si on doit comparer les genres entre deux artistes
+            if (last && last.debut.heure === current.debut.heure && last.debut.minute === current.debut.minute && last.score === 0 && current.score === 0) {
+                // Utiliser une fonction pour choisir l'artiste avec le plus de genres en commun avec genreFav
+                const bestMatch = choisirCarteSurGenres(last, current, genresFav);
+                acc[acc.length - 1] = bestMatch; // Remplacer le dernier élément par le meilleur match
+            } else if (!last || last.debut.heure !== current.debut.heure || last.debut.minute !== current.debut.minute || last.score === current.score) {
                 acc.push(current);
             } else if (last.score < current.score) {
                 acc[acc.length - 1] = current;
             }
             return acc;
-        }, []);
+        }, []);        
     }
 
     function supprimeArtistScoreNegatif(artists) {
@@ -39,26 +52,40 @@ export function PlanningScreen({ artists }) {
     
 
     const renderContentBasedOnDate = () => {
-        switch (dateSelected) {
-            case "jour1":
-                const sortedArtists = supprimeArtistScoreNegatif(triArtistParScore(artistsSorted));
+        const filteredArtistsJour = artistsSorted.filter(artist => artist.infoFestival.jour === dateSelected);
+        const sortedArtists = supprimeArtistScoreNegatif(triArtistParScore(filteredArtistsJour));
                 const artistCards = sortedArtists.map((artist, i) => (
                     <CardCalendar key={i} artist={artist} />
                 ));
 
+        switch (dateSelected) {
+            case "jour1":
                 return (
                     <View style={{ alignItems: "center", marginTop: 20 }}>
                         <ScrollView>
-                            <CardRepas />
                             {artistCards}
                             <CardDodo />
                         </ScrollView>
                     </View>
                 );
             case "jour2":
-                return <Text>Jour2</Text>;
+                return (
+                    <View style={{ alignItems: "center", marginTop: 20 }}>
+                        <ScrollView>
+                            {artistCards}
+                            <CardDodo />
+                        </ScrollView>
+                    </View>
+                );
             default:
-                return <Text>Jour3</Text>;
+                return (
+                    <View style={{ alignItems: "center", marginTop: 20 }}>
+                        <ScrollView>
+                            {artistCards}
+                            <CardDodo />
+                        </ScrollView>
+                    </View>
+                );
         }
     };
 

@@ -28,7 +28,7 @@ export default function App() {
         );
       case "planning":
         return (
-          <PlanningScreen artists={artists}></PlanningScreen>
+          <PlanningScreen artists={artists} genresFav={genresFav}></PlanningScreen>
         );
       default:
         return <Text>Ceci est l'écran de profil</Text>;
