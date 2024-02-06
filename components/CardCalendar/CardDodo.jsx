@@ -3,7 +3,7 @@ import { style } from "./CardDodo_style";
 import iconClockBleu from "./../../assets/iconClockBleu.png";
 import dodoImg from "./../../assets/dodo.png";
 
-export function CardDodo({ fin }) { // Utilisez la déstructuration pour extraire `fin` des props
+export function CardDodo({ fin }) { 
     return (
         <View style={style.container_card_calendar}>
             <View>
@@ -13,7 +13,6 @@ export function CardDodo({ fin }) { // Utilisez la déstructuration pour extrair
                 </View>
                 <View style={style.container_infos}>
                     <Image source={iconClockBleu} style={style.icon_calendar}/>
-                    {/* Assurez-vous que fin, fin.heure, et fin.minute existent avant de les utiliser */}
                     <Text style={style.text_infos}>{fin?.heure ?? '00'}h{fin?.minute ?? '00'}</Text>
                 </View>
             </View>

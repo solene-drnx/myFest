@@ -10,41 +10,41 @@ export function PlanningScreen({ artists, genresFav }) {
     let artistsSorted = artists;
 
     function choisirCarteSurGenres(cardA, cardB, genreFav) {
-        const scoreA = cardA.genre.reduce((acc, genre) => acc + (genreFav[genre] || 0), 0);
-        const scoreB = cardB.genre.reduce((acc, genre) => acc + (genreFav[genre] || 0), 0);
-        console.log(cardA.nom + scoreA);
-        console.log(cardB.nom + scoreB);
-        return scoreA >= scoreB ? cardA : cardB;
+        const scoreA = cardA.genre.reduce((acc, genre) => acc + (genreFav[genre] || 0), 0) / cardA.genre.length;
+        const scoreB = cardB.genre.reduce((acc, genre) => acc + (genreFav[genre] || 0), 0) / cardB.genre.length;
+        console.log(cardA.nom + " score: " + scoreA);
+        console.log(cardB.nom + " score: " + scoreB);
+        if (scoreA === scoreB) {
+            return [cardA, cardB];
+        }
+        return scoreA > scoreB ? [cardA] : [cardB];
     }
 
     function triArtistParScore(artists) {
         const sortedArtists = artists.sort((a, b) => {
             const minutesA = (a.debut.heure >= 6 ? a.debut.heure : a.debut.heure + 24) * 60 + a.debut.minute;
             const minutesB = (b.debut.heure >= 6 ? b.debut.heure : b.debut.heure + 24) * 60 + b.debut.minute;
-
             return minutesA - minutesB;
         });
-
-        return sortedArtists.reduce((acc, current, index, array) => {
-            // Si current.score est égal à -1, on ne fait rien et on retourne acc pour passer à l'itération suivante
-            if (current.score === -1) {
-                return acc;
-            }
-
+        const result = sortedArtists.reduce((acc, current, index, array) => {
+            if (current.score === -1) return acc;
             const last = acc[acc.length - 1];
-            // Vérifier si on doit comparer les genres entre deux artistes
             if (last && last.debut.heure === current.debut.heure && last.debut.minute === current.debut.minute && last.score === 0 && current.score === 0) {
-                // Utiliser une fonction pour choisir l'artiste avec le plus de genres en commun avec genreFav
-                const bestMatch = choisirCarteSurGenres(last, current, genresFav);
-                acc[acc.length - 1] = bestMatch; // Remplacer le dernier élément par le meilleur match
-            } else if (!last || last.debut.heure !== current.debut.heure || last.debut.minute !== current.debut.minute || last.score === current.score) {
+                const bestMatches = choisirCarteSurGenres(last, current, genresFav);
+                if (bestMatches.length === 2) { 
+                    acc.pop(); 
+                    return acc.concat(bestMatches); 
+                } else {
+                    acc[acc.length - 1] = bestMatches[0];
+                }
+            } else {
                 acc.push(current);
-            } else if (last.score < current.score) {
-                acc[acc.length - 1] = current;
             }
             return acc;
         }, []);
+        return result;
     }
+    
 
     function supprimeArtistScoreNegatif(artists) {
         return artists.filter(artist => artist.score >= 0);
@@ -54,26 +54,20 @@ export function PlanningScreen({ artists, genresFav }) {
     const renderContentBasedOnDate = () => {
         const filteredArtistsJour = artistsSorted.filter(artist => artist.infoFestival.jour === dateSelected);
         const sortedArtists = supprimeArtistScoreNegatif(triArtistParScore(filteredArtistsJour));
-        // Déclarez finDernierArtiste ici, avec une valeur initiale null ou une structure par défaut
         let finDernierArtiste = { heure: null, minute: null };
-
-        // Assurez-vous qu'il y a au moins un artiste dans la liste
         if (sortedArtists.length > 0) {
             const dernierArtiste = sortedArtists[sortedArtists.length - 1];
-            finDernierArtiste = dernierArtiste.fin; // Supposons que fin est toujours présent
+            finDernierArtiste = dernierArtiste.fin; 
         }
-
         const artistCards = sortedArtists.map((artist, i) => (
             <CardCalendar key={i} artist={artist} />
         ));
-
         switch (dateSelected) {
             case "jour1":
                 return (
                     <View style={{ alignItems: "center", marginTop: 20 }}>
                         <ScrollView>
                             {artistCards}
-                            {/* Vérifiez si finDernierArtiste a des valeurs valides avant de l'utiliser */}
                             {finDernierArtiste.heure !== null ? (
                                 <CardDodo fin={finDernierArtiste} />
                             ) : (
@@ -110,7 +104,6 @@ export function PlanningScreen({ artists, genresFav }) {
                 );
         }
     };
-
     return (
         <View style={{ flex: 1 }}>
             <View style={style.container_dates}>
