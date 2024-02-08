@@ -5,8 +5,8 @@ import { CardCalendar } from "../../components/CardCalendar/CardCalendar";
 import { CardRepas } from "../../components/CardCalendar/CardRepas";
 import { CardDodo } from "../../components/CardCalendar/CardDodo";
 
-export function PlanningScreen({ artists, genresFav }) {
-    const [dateSelected, setDateSelected] = useState("jour1");
+export function PlanningScreen({ artists, genresFav, users }) {
+    const [dateSelected, setDateSelected] = useState("jour1"); 
     let artistsSorted = artists;
 
     function choisirCarteSurGenres(cardA, cardB, genreFav) {
@@ -60,7 +60,7 @@ export function PlanningScreen({ artists, genresFav }) {
             finDernierArtiste = dernierArtiste.fin; 
         }
         const artistCards = sortedArtists.map((artist, i) => (
-            <CardCalendar key={i} artist={artist} />
+            <CardCalendar key={i} artist={artist} users={users}/>
         ));
         switch (dateSelected) {
             case "jour1":
@@ -69,7 +69,7 @@ export function PlanningScreen({ artists, genresFav }) {
                         <ScrollView>
                             {artistCards}
                             {finDernierArtiste.heure !== null ? (
-                                <CardDodo fin={finDernierArtiste} />
+                                <CardDodo fin={finDernierArtiste}/>
                             ) : (
                                 <Text>Aucune heure de fin disponible</Text>
                             )}
@@ -82,7 +82,7 @@ export function PlanningScreen({ artists, genresFav }) {
                         <ScrollView>
                             {artistCards}
                             {finDernierArtiste.heure !== null ? (
-                                <CardDodo fin={finDernierArtiste} />
+                                <CardDodo fin={finDernierArtiste}/>
                             ) : (
                                 <Text>Aucune heure de fin disponible</Text>
                             )}
@@ -95,7 +95,7 @@ export function PlanningScreen({ artists, genresFav }) {
                         <ScrollView>
                             {artistCards}
                             {finDernierArtiste.heure !== null ? (
-                                <CardDodo fin={finDernierArtiste} />
+                                <CardDodo fin={finDernierArtiste}/>
                             ) : (
                                 <Text>Aucune heure de fin disponible</Text>
                             )}

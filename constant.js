@@ -125,6 +125,9 @@ import shakaPonkCalendar from "./assets/Solidays2023/dimanche/shakaPonk_calendar
 import shygirlCalendar from "./assets/Solidays2023/dimanche/shygirl_calendar.png";
 import youvDeeCalendar from "./assets/Solidays2023/dimanche/youvDee_calendar.png";
 import zolaCalendar from "./assets/Solidays2023/dimanche/zola_calendar.png";
+// SOLIDAYS ---------------------------------------------------------------------------------------------------------------------
+import mathildaImg from "./assets/utilisateur/mathilda.jpg";
+
 
 export const LIEUX = {
     bagatelle: "Bagatelle",
@@ -264,4 +267,8 @@ export const ARTISTS = [
     { nom: "SHYGIRL", infoFestival: {festival : FESTIVALS.solidays, jour: "jour3"}, debut: {heure: 20, minute: 0}, fin: {heure: 21, minute: 0}, lieu: LIEUX.domino, genre: [GENRES.pop, GENRES.hipHop, GENRES.hipHop, GENRES.club, GENRES.electro], image: shygirlImg, imageCalendar: shygirlCalendar, score: 0 },
     { nom: "YOUV DEE", infoFestival: {festival : FESTIVALS.solidays, jour: "jour3"}, debut: {heure: 21, minute: 0}, fin: {heure: 22, minute: 0}, lieu: LIEUX.cesarCircus, genre: [GENRES.hipHop, GENRES.rap, GENRES.trap], image: youvDeeImg, imageCalendar: youvDeeCalendar, score: 0 },
     { nom: "ZOLA", infoFestival: {festival : FESTIVALS.solidays, jour: "jour3"}, debut: {heure: 17, minute: 0}, fin: {heure: 18, minute: 0}, lieu: LIEUX.paris, genre: [GENRES.rap, GENRES.hipHop, GENRES.trap], image: zolaImg, imageCalendar: zolaCalendar, score: 0 },
+];
+
+export const UTILISATEURS = [
+    { id: 1, nom: "Lando", prenom: "Mathilda", image: mathildaImg},
 ];

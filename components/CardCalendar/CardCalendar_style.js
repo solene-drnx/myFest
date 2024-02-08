@@ -40,5 +40,12 @@ export const style = StyleSheet.create({
         fontFamily: "Montserrat-Medium",
         color: "#453D41",
         fontSize: 14,
+    }, 
+    image_user: {
+        width: 17,
+        height: 17,
+        borderRadius: 100,
+        marginLeft: 2,
+        marginTop: 2,
     }
 });
