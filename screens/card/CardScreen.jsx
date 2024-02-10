@@ -1,20 +1,42 @@
-import { Animated, Text, View, PanResponder, TouchableOpacity, Image } from "react-native";
+import { Animated, Text, View, PanResponder, TouchableOpacity, Image, ActivityIndicator } from "react-native";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { ARTISTS, LIEUX, GENRES } from '../../constant';
 import TinderCard from "../../components/TinderCard/TinderCard";
 import iconCroix from "../../assets/iconCroix.png";
 import iconCoeur from "../../assets/iconCoeur.png";
+import { Asset } from 'expo-asset';
+
 
 export function CardScreen({ indexCard, setIndexCard, setArtists, setGenreFav }) {
     const [data, setData] = useState(ARTISTS);
+    const [loading, setLoading] = useState(true);
+
+    const preloadImages = async () => {
+        const imageSources = ARTISTS.map(artist => artist.image); 
+        const promises = imageSources.map(image => Asset.fromModule(image).downloadAsync());
+        await Promise.all(promises);
+    };
 
     useEffect(() => {
-        if (indexCard===61) {
+        preloadImages().then(() => {
+            console.log('Images préchargées');
+            setLoading(false); 
+        });
+    }, []);    
+
+    useEffect(() => {
+        if (indexCard === 61) {
             setData(ARTISTS);
             setIndexCard(0);
         }
+        const timer = setTimeout(() => {
+            setLoading(false); 
+        }, 10000);
+
+        return () => clearTimeout(timer);
     }, [indexCard]);
-    
+
+
     const updateScore = (artistName, increment) => {
         setArtists(currentArtists =>
             currentArtists.map(artist => {
@@ -62,8 +84,8 @@ export function CardScreen({ indexCard, setIndexCard, setArtists, setGenreFav })
     const removeCard = useCallback(() => {
         setIndexCard(prevIndex => prevIndex + 1);
         swipe.setValue({ x: 0, y: 0 });
-    }, [setData, setIndexCard, swipe, indexCard]); 
-    
+    }, [setData, setIndexCard, swipe, indexCard]);
+
 
     const ajoutGenre = (artistGenres, increment) => {
         setGenreFav(currentGenres => {
@@ -78,7 +100,7 @@ export function CardScreen({ indexCard, setIndexCard, setArtists, setGenreFav })
             return updatedGenres;
         });
     };
-    
+
 
     const swipeLeft = () => {
         Animated.timing(swipe, {
@@ -127,6 +149,14 @@ export function CardScreen({ indexCard, setIndexCard, setArtists, setGenreFav })
             ajoutGenre(data[indexCard].genre, 0);
         });
     };
+
+    if (loading) {
+        return (
+            <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+                <ActivityIndicator size="large" />
+            </View>
+        );
+    }
 
 
     return (
