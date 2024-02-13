@@ -9,6 +9,10 @@ import { useFonts } from 'expo-font';
 import { CardScreen } from './screens/card/CardScreen';
 import { PlanningScreen } from './screens/planning/PlanningScreen';
 import { ARTISTS, FAV_GENRES_INIT, UTILISATEURS } from './constant';
+import { ProfilScreen } from './screens/profil/ProfilScreen';
+import LoadingScreen from './screens/loadingScreen/LoadingScreen';
+import ConnexionScreen from './screens/connexion/ConnexionScreen';
+import InscriptionScreen from './screens/inscription/InscriptionScreen';
 
 export default function App() {
   const [isFontLoaded] = useFonts({
@@ -31,8 +35,22 @@ export default function App() {
         return (
           <PlanningScreen artists={artists} genresFav={genresFav} users={users}></PlanningScreen>
         );
+      case "inscription":
+        return(
+          <InscriptionScreen setNavSelectionne={setNavSelectionne}/>
+        );
+      case "connexion": 
+        return (
+          <ConnexionScreen setNavSelectionne={setNavSelectionne}/>
+        );
+      case "loading":
+        return (
+          <LoadingScreen/>
+        );
       default:
-        return <Text>Ceci est l'écran de profil</Text>;
+        return (
+          <ProfilScreen setNavSelectionne={setNavSelectionne}/>
+        );
     }
   };
 
