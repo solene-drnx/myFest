@@ -3,11 +3,13 @@ import { initializeApp } from "firebase/app";
 import { getAuth } from "firebase/auth";
 import { getAnalytics } from "firebase/analytics";
 import { getStorage } from "firebase/storage";
+import { getDatabase } from "firebase/database";
 
 // Your web app's Firebase configuration
 const firebaseConfig = {
     apiKey: "AIzaSyCHxGHBLjZRjQQ4W0fpZNzmzMeTdi3oaMg",
     authDomain: "myfest-8a76a.firebaseapp.com",
+    databaseURL: "https://myfest-8a76a-default-rtdb.europe-west1.firebasedatabase.app",
     projectId: "myfest-8a76a",
     storageBucket: "myfest-8a76a.appspot.com",
     messagingSenderId: "228117812009",
@@ -17,8 +19,9 @@ const firebaseConfig = {
 
 // Initialize Firebase
 const app = initializeApp(firebaseConfig);
-const auth = getAuth(app); // Get a reference to the Auth service
-const storage = getStorage(app); // Get a reference to the Storage service
-const analytics = getAnalytics(app); // Get a reference to the Analytics service
+const auth = getAuth(app); 
+const storage = getStorage(app); 
+const analytics = getAnalytics(app);
+const database = getDatabase(app);
 
-export { app, auth, storage, analytics };
+export { app, auth, storage, analytics, database };

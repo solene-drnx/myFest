@@ -5,14 +5,96 @@ import TinderCard from "../../components/TinderCard/TinderCard";
 import iconCroix from "../../assets/iconCroix.png";
 import iconCoeur from "../../assets/iconCoeur.png";
 import { Asset } from 'expo-asset';
+import { getDatabase, ref, update, get, set } from "firebase/database";
+import { getAuth } from "firebase/auth";
 
-
-export function CardScreen({ indexCard, setIndexCard, setArtists, setGenreFav }) {
+export function CardScreen({ indexCard, setIndexCard, setArtists, genresFav, setGenreFav}) {
     const [data, setData] = useState(ARTISTS);
     const [loading, setLoading] = useState(true);
 
+    const enregistrerDonneesUtilisateur = async (artistName, newScore) => {
+        const auth = getAuth();
+        const user = auth.currentUser;
+    
+        if (user) {
+            const userId = user.uid;
+            const db = getDatabase();
+            const scoresRef = ref(db, `usersData/${userId}/scores`);
+    
+            try {
+                const snapshot = await get(scoresRef);
+                if (snapshot.exists()) {
+                    const scores = snapshot.val();
+                    const updatedScores = { ...scores, [artistName]: newScore };
+                    await update(scoresRef, updatedScores);
+                    console.log("Score de l'artiste mis à jour avec succès dans Realtime Database !");
+                } else {
+                    await update(scoresRef, { [artistName]: newScore });
+                    console.log("Score de l'artiste ajouté avec succès dans Realtime Database !");
+                }
+            } catch (error) {
+                console.error("Erreur lors de l'enregistrement des scores dans Realtime Database:", error);
+            }
+        }
+    };
+
+    const enregistrerGenreFav = async (genresFav) => {
+        const auth = getAuth();
+        const user = auth.currentUser;
+    
+        if (user) {
+            const userId = user.uid;
+            const db = getDatabase();
+            const genreFavRef = ref(db, `usersData/${userId}/genresFavoris`);
+    
+            try {
+                await set(genreFavRef, genresFav);
+                console.log("Genres favoris enregistrés (ou écrasés) avec succès dans Realtime Database !");
+            } catch (error) {
+                console.error("Erreur lors de l'enregistrement des genres favoris dans Realtime Database:", error);
+            }
+        } else {
+            console.log("Aucun utilisateur connecté pour enregistrer les genres favoris.");
+        }
+    };
+
+    const enregistrerIndexCard = async (nouvelIndex) => {
+        const auth = getAuth();
+        const user = auth.currentUser;
+    
+        if (user) {
+            const userId = user.uid;
+            const db = getDatabase();
+            const indexCardRef = ref(db, `usersData/${userId}/indexCard`);
+    
+            try {
+                await set(indexCardRef, nouvelIndex);
+                console.log("IndexCard enregistré avec succès dans Realtime Database !");
+            } catch (error) {
+                console.error("Erreur lors de l'enregistrement de l'indexCard dans Realtime Database:", error);
+            }
+        } else {
+            console.log("Aucun utilisateur connecté pour enregistrer l'indexCard.");
+        }
+    };
+    
+    
+
+    const ecrireTestDansDatabase = async () => {
+        const db = getDatabase();
+        const rootRef = ref(db, '/');
+    
+        try {
+            await set(rootRef, { test: "test" });
+            console.log("La valeur 'test' a été écrite avec succès à la racine de la base de données.");
+        } catch (error) {
+            console.error("Erreur lors de l'écriture à la racine de la base de données :", error);
+        }
+    };
+    
+    
     const preloadImages = async () => {
-        const imageSources = ARTISTS.map(artist => artist.image); 
+        const imageSources = ARTISTS.map(artist => artist.image);
         const promises = imageSources.map(image => Asset.fromModule(image).downloadAsync());
         await Promise.all(promises);
     };
@@ -20,17 +102,18 @@ export function CardScreen({ indexCard, setIndexCard, setArtists, setGenreFav })
     useEffect(() => {
         preloadImages().then(() => {
             console.log('Images préchargées');
-            setLoading(false); 
+            setLoading(false);
         });
-    }, []);    
+    }, []);
 
     useEffect(() => {
         if (indexCard === 61) {
             setData(ARTISTS);
             setIndexCard(0);
+            enregistrerIndexCard(0);
         }
         const timer = setTimeout(() => {
-            setLoading(false); 
+            setLoading(false);
         }, 10000);
 
         return () => clearTimeout(timer);
@@ -40,10 +123,16 @@ export function CardScreen({ indexCard, setIndexCard, setArtists, setGenreFav })
     const updateScore = (artistName, increment) => {
         setArtists(currentArtists =>
             currentArtists.map(artist => {
-                return artist.nom === artistName ? { ...artist, score: increment } : artist;
+                if (artist.nom === artistName) {
+                    return { ...artist, score: increment };
+                }
+                return artist;
             })
         );
+        enregistrerDonneesUtilisateur(artistName, increment);
     };
+    
+    
 
     const swipe = useRef(new Animated.ValueXY()).current;
     const panResponser = PanResponder.create({
@@ -83,6 +172,7 @@ export function CardScreen({ indexCard, setIndexCard, setArtists, setGenreFav })
 
     const removeCard = useCallback(() => {
         setIndexCard(prevIndex => prevIndex + 1);
+        enregistrerIndexCard(indexCard);
         swipe.setValue({ x: 0, y: 0 });
     }, [setData, setIndexCard, swipe, indexCard]);
 
@@ -92,14 +182,17 @@ export function CardScreen({ indexCard, setIndexCard, setArtists, setGenreFav })
             const updatedGenres = { ...currentGenres };
             artistGenres.forEach(genre => {
                 if (updatedGenres[genre]) {
-                    updatedGenres[genre] += increment; // Incrémente si le genre existe déjà
+                    updatedGenres[genre] += increment; 
                 } else {
-                    updatedGenres[genre] = increment; // Initialise à 1 si le genre n'existe pas
+                    updatedGenres[genre] = increment;
                 }
             });
             return updatedGenres;
         });
+        enregistrerGenreFav(genresFav);
     };
+    
+    
 
 
     const swipeLeft = () => {
@@ -122,7 +215,7 @@ export function CardScreen({ indexCard, setIndexCard, setArtists, setGenreFav })
         }).start(() => {
             removeCard();
             updateScore(data[indexCard].nom, 1);
-            ajoutGenre(data[indexCard].genre, 1); // Assurez-vous que data[indexCard].genres est un tableau
+            ajoutGenre(data[indexCard].genre, 1); 
         });
     };
 
@@ -134,7 +227,7 @@ export function CardScreen({ indexCard, setIndexCard, setArtists, setGenreFav })
         }).start(() => {
             removeCard();
             updateScore(data[indexCard].nom, 4);
-            ajoutGenre(data[indexCard].genre, 4); // Assurez-vous que data[indexCard].genres est un tableau
+            ajoutGenre(data[indexCard].genre, 4);
         });
     };
 
