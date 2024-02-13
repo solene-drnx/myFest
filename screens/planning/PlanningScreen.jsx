@@ -5,7 +5,7 @@ import { CardCalendar } from "../../components/CardCalendar/CardCalendar";
 import { CardRepas } from "../../components/CardCalendar/CardRepas";
 import { CardDodo } from "../../components/CardCalendar/CardDodo";
 
-export function PlanningScreen({ artists, genresFav, users }) {
+export function PlanningScreen({ artists, genresFav, users, currentUser }) {
     const [dateSelected, setDateSelected] = useState("jour1"); 
     let artistsSorted = artists;
 
@@ -60,8 +60,9 @@ export function PlanningScreen({ artists, genresFav, users }) {
             finDernierArtiste = dernierArtiste.fin; 
         }
         const artistCards = sortedArtists.map((artist, i) => (
-            <CardCalendar key={i} artist={artist} users={users}/>
+            <CardCalendar key={i} artist={artist} users={users} currentUserProfileImage={currentUser?.photoURL} />
         ));
+        
         switch (dateSelected) {
             case "jour1":
                 return (

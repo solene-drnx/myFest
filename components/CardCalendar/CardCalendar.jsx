@@ -3,7 +3,8 @@ import { style } from "./CardCalendar_style";
 import iconClock from "./../../assets/iconClock.png";
 import iconLieu from "./../../assets/iconLieu.png";
 
-export function CardCalendar({ artist, users }) {
+// Ajout d'un nouvel argument `currentUserProfileImage` pour recevoir l'URL de la photo de profil de l'utilisateur
+export function CardCalendar({ artist, users, currentUserProfileImage }) {
     return (
         <View style={style.container_card_calendar}>
             <View>
@@ -19,12 +20,11 @@ export function CardCalendar({ artist, users }) {
                 {
                     artist.score === 1 || artist.score === 4 ? (
                         <View style={style.container_infos}>
-                            <Image source={users[0].image} style={style.image_user} />
+                            {/* Modification ici pour utiliser `currentUserProfileImage` */}
+                            <Image source={{ uri: currentUserProfileImage }} style={style.image_user} />
                         </View>
                     ) : null
                 }
-
-
             </View>
             <Image source={artist.imageCalendar} style={style.image_calendar} />
         </View>
