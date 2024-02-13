@@ -53,5 +53,16 @@ export const style = StyleSheet.create({
     },
     container_swiper : {
         marginBottom: 20,
+    },
+    messageContainer: {
+        flex: 1,
+        justifyContent: "center",
+        alignItems: "center",
+        padding: 20,
+    },
+    messageText : {
+        fontFamily: "Montserrat-Black",
+        color: "#F57C33",
+        fontSize: 30,
     }
 });

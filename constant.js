@@ -125,16 +125,22 @@ import shakaPonkCalendar from "./assets/Solidays2023/dimanche/shakaPonk_calendar
 import shygirlCalendar from "./assets/Solidays2023/dimanche/shygirl_calendar.png";
 import youvDeeCalendar from "./assets/Solidays2023/dimanche/youvDee_calendar.png";
 import zolaCalendar from "./assets/Solidays2023/dimanche/zola_calendar.png";
-// SOLIDAYS ---------------------------------------------------------------------------------------------------------------------
+// WE LOVE GREEN 2023 ------------------------------------------------------------------------------------------------------------
 import mathildaImg from "./assets/utilisateur/mathilda.jpg";
-
+import superJazzClubImg from "./assets/weLoveGreen2023/vendredi/superJazzClub.png";
+import superJazzClubCalendar from "./assets/weLoveGreen2023/vendredi/superJazzClub_calendar.png";
+import nxWorriesImg from "./assets/weLoveGreen2023/vendredi/nxWorries.png";
+import nxWorriesCalendar from "./assets/weLoveGreen2023/vendredi/nxWorries_calendar.png";
+import orelsanImg from "./assets/weLoveGreen2023/vendredi/orelsan.png";
+import orelsanCalendar from "./assets/weLoveGreen2023/vendredi/orelsan_calendar.png";
 
 export const LIEUX = {
     bagatelle: "Bagatelle",
     paris: "Paris",
     dome: "Dome",
     domino: "Domino",
-    cesarCircus: "Cesar Circus"
+    cesarCircus: "Cesar Circus",
+    prairie: "La Prairie"
 };
 
 export const GENRES = {
@@ -202,7 +208,8 @@ export const FAV_GENRES_INIT = {
 };
 
 export const FESTIVALS = {
-    solidays : "Solidays",
+    solidays : {db: "solidays2023", nom: "solidays", annee: 2023, jour1: {jour: "ven", num: 23, mois: "juin"}, jour2: {jour: "sam", num: 24, mois: "juin"}, jour3: {jour: "dim", num: 25, mois: "juin"}, taille: 61},
+    weLoveGreen2023: {db: "weLoveGreen2023", nom: "WeLoveGreen", annee: 2023, jour1: {jour: "ven", num: 2, mois: "juin"}, jour2: {jour: "sam", num: 3, mois: "juin"}, jour3: {jour: "dim", num: 4, mois: "juin"}, taille: 3}
 }
 
 export const ARTISTS = [
@@ -267,6 +274,9 @@ export const ARTISTS = [
     { nom: "SHYGIRL", infoFestival: {festival : FESTIVALS.solidays, jour: "jour3"}, debut: {heure: 20, minute: 0}, fin: {heure: 21, minute: 0}, lieu: LIEUX.domino, genre: [GENRES.pop, GENRES.hipHop, GENRES.hipHop, GENRES.club, GENRES.electro], image: shygirlImg, imageCalendar: shygirlCalendar, score: 0 },
     { nom: "YOUV DEE", infoFestival: {festival : FESTIVALS.solidays, jour: "jour3"}, debut: {heure: 21, minute: 0}, fin: {heure: 22, minute: 0}, lieu: LIEUX.cesarCircus, genre: [GENRES.hipHop, GENRES.rap, GENRES.trap], image: youvDeeImg, imageCalendar: youvDeeCalendar, score: 0 },
     { nom: "ZOLA", infoFestival: {festival : FESTIVALS.solidays, jour: "jour3"}, debut: {heure: 17, minute: 0}, fin: {heure: 18, minute: 0}, lieu: LIEUX.paris, genre: [GENRES.rap, GENRES.hipHop, GENRES.trap], image: zolaImg, imageCalendar: zolaCalendar, score: 0 },
+    { nom: "SUPER JAZZ CLUB", infoFestival: {festival: FESTIVALS.weLoveGreen2023, jour: "jour1"}, debut: {heure: 18, minute: 15}, fin: {heure: 19, minute: 15}, lieu: LIEUX.prairie, genre: [GENRES.jazz, GENRES.rap, GENRES.hipHop, GENRES.soul, GENRES.rnb], image: superJazzClubImg, imageCalendar: superJazzClubCalendar, score: 0},
+    { nom: "NX WORRIES", infoFestival: {festival: FESTIVALS.weLoveGreen2023, jour: "jour1"}, debut: {heure: 20, minute: 15}, fin: {heure: 21, minute: 15}, lieu: LIEUX.prairie, genre: [GENRES.hipHop, GENRES.soul, GENRES.rnb], image: nxWorriesImg, imageCalendar: nxWorriesCalendar, score: 0 },
+    { nom: "ORELSAN", infoFestival: {festival: FESTIVALS.weLoveGreen2023, jour: "jour1"}, debut: {heure: 22, minute: 15}, fin: {heure: 23, minute: 45}, lieu: LIEUX.prairie, genre: [GENRES.hipHop, GENRES.rap, GENRES.electro], image: orelsanImg, imageCalendar: orelsanCalendar, score: 0 }
 ];
 
 export const UTILISATEURS = [

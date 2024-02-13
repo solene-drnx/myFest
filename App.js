@@ -8,7 +8,7 @@ import montserratMedium from "./assets/fonts/montserrat_medium.ttf";
 import { useFonts } from 'expo-font';
 import { CardScreen } from './screens/card/CardScreen';
 import { PlanningScreen } from './screens/planning/PlanningScreen';
-import { ARTISTS, FAV_GENRES_INIT, UTILISATEURS } from './constant';
+import { ARTISTS, FAV_GENRES_INIT, FESTIVALS, UTILISATEURS } from './constant';
 import { ProfilScreen } from './screens/profil/ProfilScreen';
 import LoadingScreen from './screens/loadingScreen/LoadingScreen';
 import ConnexionScreen from './screens/connexion/ConnexionScreen';
@@ -19,8 +19,8 @@ import { getDatabase, ref, get } from "firebase/database";
 
 export default function App() {
   const [isFontLoaded] = useFonts({
-    "Montserrat-Black" : montserratBlack,
-    "Montserrat-Medium" : montserratMedium,
+    "Montserrat-Black": montserratBlack,
+    "Montserrat-Medium": montserratMedium,
   });
   const [navSelectionne, setNavSelectionne] = useState("loading"); // Commencez par l'écran de chargement
   const [currentUser, setCurrentUser] = useState(null); // État pour l'utilisateur actuel
@@ -28,6 +28,7 @@ export default function App() {
   const [indexCard, setIndexCard] = useState(0);
   const [genresFav, setGenreFav] = useState(FAV_GENRES_INIT);
   const [users, setUsers] = useState(UTILISATEURS);
+  const [festival, setFestival] = useState(FESTIVALS.weLoveGreen2023);
 
   useEffect(() => {
     const auth = getAuth();
@@ -49,7 +50,7 @@ export default function App() {
   useEffect(() => {
     const fetchUserData = async (userId) => {
       const db = getDatabase();
-      const userRef = ref(db, `usersData/${userId}`);
+      const userRef = ref(db, `usersData/${userId}/${festival.db}`);
       const snapshot = await get(userRef);
 
       if (snapshot.exists()) {
@@ -88,14 +89,41 @@ export default function App() {
 
     return () => unsubscribe();
   }, []);
-  
+
 
   const gestionDesScreens = () => {
+    // Vérifier si le festival est sélectionné
+    if (!festival || !festival.nom) {
+      // Afficher un message demandant de sélectionner un festival
+      switch (navSelectionne) {
+        case "profil":
+          return <ProfilScreen setNavSelectionne={setNavSelectionne} currentUser={currentUser} setFestival={setFestival} />;
+        case "inscription":
+          return <InscriptionScreen setNavSelectionne={setNavSelectionne} />;
+        case "connexion":
+          return <ConnexionScreen setNavSelectionne={setNavSelectionne} />;
+        case "loading":
+          return <LoadingScreen />;
+        case "card":
+          return (
+            <View style={style.messageContainer}>
+              <Text style={style.messageText}>Veuillez sélectionner un festival dans votre profil pour commencer !</Text>
+            </View>
+          );
+        default:
+          return (
+            <View style={style.messageContainer}>
+              <Text style={style.messageText}>Veuillez sélectionner un festival dans votre profil pour commencer !</Text>
+            </View>
+          );
+      }
+    }
+    // Si un festival est sélectionné, continuer avec la logique existante
     switch (navSelectionne) {
       case "card":
-        return <CardScreen indexCard={indexCard} setIndexCard={setIndexCard} setArtists={setArtists} genresFav={genresFav} setGenreFav={setGenreFav} />;
+        return <CardScreen indexCard={indexCard} setIndexCard={setIndexCard} setArtists={setArtists} genresFav={genresFav} setGenreFav={setGenreFav} festival={festival} />;
       case "planning":
-        return <PlanningScreen artists={artists} genresFav={genresFav} users={users} currentUser={currentUser} />
+        return <PlanningScreen artists={artists} genresFav={genresFav} users={users} currentUser={currentUser} festival={festival} />
       case "inscription":
         return <InscriptionScreen setNavSelectionne={setNavSelectionne} />;
       case "connexion":
@@ -103,9 +131,10 @@ export default function App() {
       case "loading":
         return <LoadingScreen />;
       default:
-        return <ProfilScreen setNavSelectionne={setNavSelectionne} currentUser={currentUser} />;
+        return <ProfilScreen setNavSelectionne={setNavSelectionne} currentUser={currentUser} setFestival={setFestival} />;
     }
   };
+
 
   return (
     <>

@@ -8,9 +8,53 @@ import { Asset } from 'expo-asset';
 import { getDatabase, ref, update, get, set } from "firebase/database";
 import { getAuth } from "firebase/auth";
 
-export function CardScreen({ indexCard, setIndexCard, setArtists, genresFav, setGenreFav}) {
-    const [data, setData] = useState(ARTISTS);
+export function CardScreen({ indexCard, setIndexCard, setArtists, genresFav, setGenreFav, festival}) {
+    const [data, setData] = useState([]);
     const [loading, setLoading] = useState(true);
+
+    useEffect(() => {
+        const fetchIndexCard = async () => {
+            const auth = getAuth();
+            const user = auth.currentUser;
+    
+            if (user && festival) {
+                const db = getDatabase();
+                const userId = user.uid;
+                const indexCardRef = ref(db, `usersData/${userId}/${festival.db}/indexCard`);
+    
+                try {
+                    const snapshot = await get(indexCardRef);
+                    if (snapshot.exists()) {
+                        setIndexCard(snapshot.val());
+                    } else {
+                        setIndexCard(0);
+                    }
+                } catch (error) {
+                    console.error("Erreur lors de la récupération de l'indexCard :", error);
+                    setIndexCard(0);
+                }
+            }
+        };
+        const filteredArtists = ARTISTS.filter(artist => artist.infoFestival.festival.nom === festival.nom);
+        setData(filteredArtists);
+        fetchIndexCard();
+    }, [festival]); 
+    
+
+    useEffect(() => {
+        const preloadImages = async () => {
+            const imageSources = ARTISTS.filter(artist => artist.infoFestival.festival.nom === festival.nom)
+                                        .map(artist => artist.image);
+            const promises = imageSources.map(image => Asset.fromModule(image).downloadAsync());
+            await Promise.all(promises);
+            console.log('Images préchargées pour le festival actuel');
+        };
+    
+        if (festival) {
+            preloadImages();
+        }
+    }, [festival]); 
+    
 
     const enregistrerDonneesUtilisateur = async (artistName, newScore) => {
         const auth = getAuth();
@@ -19,7 +63,7 @@ export function CardScreen({ indexCard, setIndexCard, setArtists, genresFav, set
         if (user) {
             const userId = user.uid;
             const db = getDatabase();
-            const scoresRef = ref(db, `usersData/${userId}/scores`);
+            const scoresRef = ref(db, `usersData/${userId}/${festival.db}/scores`);
     
             try {
                 const snapshot = await get(scoresRef);
@@ -45,7 +89,7 @@ export function CardScreen({ indexCard, setIndexCard, setArtists, genresFav, set
         if (user) {
             const userId = user.uid;
             const db = getDatabase();
-            const genreFavRef = ref(db, `usersData/${userId}/genresFavoris`);
+            const genreFavRef = ref(db, `usersData/${userId}/${festival.db}/genresFavoris`);
     
             try {
                 await set(genreFavRef, genresFav);
@@ -65,7 +109,7 @@ export function CardScreen({ indexCard, setIndexCard, setArtists, genresFav, set
         if (user) {
             const userId = user.uid;
             const db = getDatabase();
-            const indexCardRef = ref(db, `usersData/${userId}/indexCard`);
+            const indexCardRef = ref(db, `usersData/${userId}/${festival.db}/indexCard`);
     
             try {
                 await set(indexCardRef, nouvelIndex);
@@ -107,17 +151,17 @@ export function CardScreen({ indexCard, setIndexCard, setArtists, genresFav, set
     }, []);
 
     useEffect(() => {
-        if (indexCard === 61) {
-            setData(ARTISTS);
-            setIndexCard(0);
-            enregistrerIndexCard(0);
+        if (indexCard === festival.taille) {
+            setIndexCard(0); 
+            enregistrerIndexCard(0); 
         }
+    
         const timer = setTimeout(() => {
             setLoading(false);
         }, 10000);
-
-        return () => clearTimeout(timer);
-    }, [indexCard]);
+    
+        return () => clearTimeout(timer); 
+    }, [indexCard, data]);
 
 
     const updateScore = (artistName, increment) => {

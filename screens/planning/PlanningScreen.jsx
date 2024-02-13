@@ -4,8 +4,9 @@ import { style } from "./PlanningScreen_style";
 import { CardCalendar } from "../../components/CardCalendar/CardCalendar";
 import { CardRepas } from "../../components/CardCalendar/CardRepas";
 import { CardDodo } from "../../components/CardCalendar/CardDodo";
+import { FESTIVALS } from "../../constant";
 
-export function PlanningScreen({ artists, genresFav, users, currentUser }) {
+export function PlanningScreen({ artists, genresFav, users, currentUser, festival }) {
     const [dateSelected, setDateSelected] = useState("jour1"); 
     let artistsSorted = artists;
 
@@ -52,7 +53,10 @@ export function PlanningScreen({ artists, genresFav, users, currentUser }) {
 
 
     const renderContentBasedOnDate = () => {
-        const filteredArtistsJour = artistsSorted.filter(artist => artist.infoFestival.jour === dateSelected);
+        const filteredArtistsJour = artistsSorted.filter(artist => 
+            artist.infoFestival.festival.nom === festival.nom && 
+            artist.infoFestival.jour === dateSelected
+        );
         const sortedArtists = supprimeArtistScoreNegatif(triArtistParScore(filteredArtistsJour));
         let finDernierArtiste = { heure: null, minute: null };
         if (sortedArtists.length > 0) {
@@ -109,24 +113,24 @@ export function PlanningScreen({ artists, genresFav, users, currentUser }) {
         <View style={{ flex: 1 }}>
             <View style={style.container_dates}>
                 <View style={style.container_festival}>
-                    <Text style={style.text_festival}>solidays</Text>
-                    <Text style={style.text_festival}>2023</Text>
+                    <Text style={style.text_festival}>{festival.nom}</Text>
+                    <Text style={style.text_festival}>{festival.annee}</Text>
                 </View>
                 <View style={style.dates}>
                     <TouchableOpacity style={[style.container_jour, dateSelected === "jour1" ? { backgroundColor: "#F57C33" } : { color: "#FDF4EB" }]} onPress={() => setDateSelected("jour1")}>
-                        <Text style={[style.text_jour_mois, dateSelected === "jour1" ? { color: "#FDF4EB" } : { color: "#F57C33" }]}>ven</Text>
-                        <Text style={[style.text_numero, dateSelected === "jour1" ? { color: "#FDF4EB" } : { color: "#F57C33" }]}>23</Text>
-                        <Text style={[style.text_jour_mois, dateSelected === "jour1" ? { color: "#FDF4EB" } : { color: "#F57C33" }]}>juin</Text>
+                        <Text style={[style.text_jour_mois, dateSelected === "jour1" ? { color: "#FDF4EB" } : { color: "#F57C33" }]}>{festival.jour1.jour}</Text>
+                        <Text style={[style.text_numero, dateSelected === "jour1" ? { color: "#FDF4EB" } : { color: "#F57C33" }]}>{festival.jour1.num}</Text>
+                        <Text style={[style.text_jour_mois, dateSelected === "jour1" ? { color: "#FDF4EB" } : { color: "#F57C33" }]}>{festival.jour1.mois}</Text>
                     </TouchableOpacity>
                     <TouchableOpacity style={[style.container_jour, dateSelected === "jour2" ? { backgroundColor: "#F57C33" } : { color: "#FDF4EB" }]} onPress={() => setDateSelected("jour2")}>
-                        <Text style={[style.text_jour_mois, dateSelected === "jour2" ? { color: "#FDF4EB" } : { color: "#F57C33" }]}>sam</Text>
-                        <Text style={[style.text_numero, dateSelected === "jour2" ? { color: "#FDF4EB" } : { color: "#F57C33" }]}>24</Text>
-                        <Text style={[style.text_jour_mois, dateSelected === "jour2" ? { color: "#FDF4EB" } : { color: "#F57C33" }]}>juin</Text>
+                        <Text style={[style.text_jour_mois, dateSelected === "jour2" ? { color: "#FDF4EB" } : { color: "#F57C33" }]}>{festival.jour2.jour}</Text>
+                        <Text style={[style.text_numero, dateSelected === "jour2" ? { color: "#FDF4EB" } : { color: "#F57C33" }]}>{festival.jour2.num}</Text>
+                        <Text style={[style.text_jour_mois, dateSelected === "jour2" ? { color: "#FDF4EB" } : { color: "#F57C33" }]}>{festival.jour2.mois}</Text>
                     </TouchableOpacity>
                     <TouchableOpacity style={[style.container_jour, dateSelected === "jour3" ? { backgroundColor: "#F57C33" } : { color: "#FDF4EB" }]} onPress={() => setDateSelected("jour3")}>
-                        <Text style={[style.text_jour_mois, dateSelected === "jour3" ? { color: "#FDF4EB" } : { color: "#F57C33" }]}>dim</Text>
-                        <Text style={[style.text_numero, dateSelected === "jour3" ? { color: "#FDF4EB" } : { color: "#F57C33" }]}>25</Text>
-                        <Text style={[style.text_jour_mois, dateSelected === "jour3" ? { color: "#FDF4EB" } : { color: "#F57C33" }]}>juin</Text>
+                        <Text style={[style.text_jour_mois, dateSelected === "jour3" ? { color: "#FDF4EB" } : { color: "#F57C33" }]}>{festival.jour3.jour}</Text>
+                        <Text style={[style.text_numero, dateSelected === "jour3" ? { color: "#FDF4EB" } : { color: "#F57C33" }]}>{festival.jour3.num}</Text>
+                        <Text style={[style.text_jour_mois, dateSelected === "jour3" ? { color: "#FDF4EB" } : { color: "#F57C33" }]}>{festival.jour3.mois}</Text>
                     </TouchableOpacity>
                 </View>
             </View>
