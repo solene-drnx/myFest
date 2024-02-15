@@ -120,22 +120,7 @@ export function CardScreen({ indexCard, setIndexCard, setArtists, genresFav, set
         } else {
             console.log("Aucun utilisateur connecté pour enregistrer l'indexCard.");
         }
-    };
-    
-    
-
-    const ecrireTestDansDatabase = async () => {
-        const db = getDatabase();
-        const rootRef = ref(db, '/');
-    
-        try {
-            await set(rootRef, { test: "test" });
-            console.log("La valeur 'test' a été écrite avec succès à la racine de la base de données.");
-        } catch (error) {
-            console.error("Erreur lors de l'écriture à la racine de la base de données :", error);
-        }
-    };
-    
+    }; 
     
     const preloadImages = async () => {
         const imageSources = ARTISTS.map(artist => artist.image);

@@ -1,11 +1,12 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import { View, Text, StyleSheet, TextInput, TouchableOpacity, Image, Alert } from "react-native";
 import { auth } from "../../firebase";
-import { createUserWithEmailAndPassword, updateProfile } from "firebase/auth";
+import { createUserWithEmailAndPassword, updateProfile, sendPasswordResetEmail } from "firebase/auth";
 import * as ImagePicker from "expo-image-picker";
 import { getStorage, ref as storageRef, uploadBytes, getDownloadURL } from "firebase/storage";
 import Ionicons from 'react-native-vector-icons/Ionicons';
-import * as FileSystem from "expo-file-system";
+import { getDatabase, ref, set, get } from "firebase/database";
+import { ARTISTS, FESTIVALS } from "../../constant";
 
 
 function InscriptionScreen({ setNavSelectionne }) {
@@ -31,42 +32,63 @@ function InscriptionScreen({ setNavSelectionne }) {
         }
     };
 
-    const handleInscription = () => {
-        const { name, email, password } = user;
-        if (image != null) {
-            uploadImageAsync(image)
-                .then(downloadURL => {
-                    createUser(email, password, name, downloadURL);
-                })
-                .catch(error => {
-                    console.error(error);
-                    setErrorMessage("Erreur lors de l'upload de l'image.");
+    const initializeUserScores = async (userId) => {
+        const db = getDatabase();
+        const festivals = Object.values(FESTIVALS); 
+
+        festivals.forEach(async (festival) => {
+            const festivalScoresRef = ref(db, `usersData/${userId}/${festival.db}/scores`);
+
+            const scores = {};
+            ARTISTS.filter(artist => artist.infoFestival.festival.db === festival.db)
+                .forEach(artist => {
+                    scores[artist.nom] = 0; 
                 });
-        } else {
-            createUser(email, password, name);
+
+            await set(festivalScoresRef, scores);
+        });
+    };
+
+
+    const handleInscription = async () => {
+        const { name, email, password } = user;
+        try {
+            const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+            let downloadURL = null;
+            if (image) {
+                downloadURL = await uploadImageAsync(image);
+            }
+            await updateProfile(userCredential.user, {
+                displayName: name,
+                ...(downloadURL && { photoURL: downloadURL })
+            });
+            await initializeUserScores(userCredential.user.uid);
+            setNavSelectionne("profil");
+        } catch (error) {
+            console.error(error);
+            setErrorMessage(error.message);
         }
     };
-    
+
     const uploadImageAsync = async (uri) => {
         setUploading(true);
         const filename = uri.substring(uri.lastIndexOf('/') + 1);
         const blob = await (await fetch(uri)).blob();
         const storage = getStorage();
         const imageRef = storageRef(storage, `images/${filename}`);
-    
         await uploadBytes(imageRef, blob);
         const downloadURL = await getDownloadURL(imageRef);
         setUploading(false);
         return downloadURL;
     };
-    
+
     const createUser = (email, password, name, photoURL = null) => {
         createUserWithEmailAndPassword(auth, email, password)
             .then(userCredentials => {
                 const user = userCredentials.user;
                 updateProfile(user, {
                     displayName: name,
-                    ...(photoURL && { photoURL }) 
+                    ...(photoURL && { photoURL })
                 }).then(() => {
                     console.log('Profile updated!');
                     setNavSelectionne("profil");
@@ -90,18 +112,18 @@ function InscriptionScreen({ setNavSelectionne }) {
             </View>
 
             <View style={style.container_imagePicker}>
-            <TouchableOpacity style={style.selectButton} onPress={pickImage}>
-                <Ionicons
-                    name="add"
-                    size={40}
-                    color="#FFF">
+                <TouchableOpacity style={style.selectButton} onPress={pickImage}>
+                    <Ionicons
+                        name="add"
+                        size={40}
+                        color="#FFF">
 
-                </Ionicons>
-            </TouchableOpacity>
-            <View style={style.imageContainer}>
-                {image && <Image source={{ uri: image }} style={{ width: 100, height: 100, borderRadius: 50, marginTop: -100 }} />}
+                    </Ionicons>
+                </TouchableOpacity>
+                <View style={style.imageContainer}>
+                    {image && <Image source={{ uri: image }} style={{ width: 100, height: 100, borderRadius: 50, marginTop: -100 }} />}
+                </View>
             </View>
-        </View>
 
             <View style={style.form}>
                 <View>
