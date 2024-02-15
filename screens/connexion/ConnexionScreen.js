@@ -15,9 +15,7 @@ export default class ConnexionScreen extends React.Component {
 
         signInWithEmailAndPassword(auth, email, password)
             .then((userCredentials) => {
-                // Connexion réussie, vous pouvez ici rediriger l'utilisateur ou effectuer d'autres actions
-                // Par exemple, changer l'écran affiché en utilisant une prop passée depuis le composant parent
-                this.props.setNavSelectionne("profil"); // Assurez-vous que "profil" est bien la valeur attendue pour naviguer vers le profil
+                this.props.setNavSelectionne("profil"); 
             })
             .catch(error => this.setState({ errorMessage: error.message }));
     };
@@ -25,7 +23,7 @@ export default class ConnexionScreen extends React.Component {
     render() {
         return (
             <View style={style.container}>
-                <Text style={style.greeting}>{"Hello again👋\nBienvenue sur myFest !"}</Text>
+                <Text style={style.greeting}>{"Connecte-toi pour commencer 🪩🕺"}</Text>
                 <View style={style.errorMessage}>
                     {this.state.errorMessage && <Text style={style.error}>{this.state.errorMessage}</Text>}
                 </View>
@@ -70,9 +68,11 @@ const style = StyleSheet.create({
     },
     greeting: {
         marginTop: 32,
-        fontSize: 18,
+        fontSize: 22,
+        marginHorizontal: 20,
         fontFamily: "Montserrat-Black",
         textAlign: "center",
+        color: "#F57C33"
     },
     errorMessage: {
         height: 72,

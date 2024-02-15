@@ -19,7 +19,6 @@ function InscriptionScreen({ setNavSelectionne }) {
     const [uploading, setUploading] = useState(false);
 
     const pickImage = async () => {
-        // no permissions request is necessary for launching the image library
         let result = await ImagePicker.launchImageLibraryAsync({
             mediaTypes: ImagePicker.MediaTypeOptions.All,
             allowsEditing: true,
@@ -34,12 +33,9 @@ function InscriptionScreen({ setNavSelectionne }) {
 
     const handleInscription = () => {
         const { name, email, password } = user;
-    
-        // Vérifiez si une image a été sélectionnée.
         if (image != null) {
             uploadImageAsync(image)
                 .then(downloadURL => {
-                    // L'image a été uploadée et vous avez l'URL, vous pouvez maintenant créer l'utilisateur.
                     createUser(email, password, name, downloadURL);
                 })
                 .catch(error => {
@@ -47,7 +43,6 @@ function InscriptionScreen({ setNavSelectionne }) {
                     setErrorMessage("Erreur lors de l'upload de l'image.");
                 });
         } else {
-            // Aucune image n'a été sélectionnée, continuez avec la création de l'utilisateur sans image.
             createUser(email, password, name);
         }
     };
@@ -71,7 +66,7 @@ function InscriptionScreen({ setNavSelectionne }) {
                 const user = userCredentials.user;
                 updateProfile(user, {
                     displayName: name,
-                    ...(photoURL && { photoURL }) // Ajoute l'URL de la photo de profil si disponible.
+                    ...(photoURL && { photoURL }) 
                 }).then(() => {
                     console.log('Profile updated!');
                     setNavSelectionne("profil");
@@ -88,7 +83,7 @@ function InscriptionScreen({ setNavSelectionne }) {
 
     return (
         <View style={style.container}>
-            <Text style={style.greeting}>{"Hello 👋\n Inscris toi pour commencer"}</Text>
+            <Text style={style.greeting}>{"Inscris toi pour commencer 🪩🕺"}</Text>
 
             <View style={style.errorMessage}>
                 {errorMessage && <Text style={style.error}>{errorMessage}</Text>}
@@ -156,9 +151,11 @@ const style = StyleSheet.create({
     },
     greeting: {
         marginTop: 32,
-        fontSize: 18,
+        fontSize: 22,
+        marginHorizontal: 30,
         fontFamily: "Montserrat-Black",
         textAlign: "center",
+        color: "#F57C33"
     },
     errorMessage: {
         height: 72,

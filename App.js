@@ -22,8 +22,8 @@ export default function App() {
     "Montserrat-Black": montserratBlack,
     "Montserrat-Medium": montserratMedium,
   });
-  const [navSelectionne, setNavSelectionne] = useState("loading"); // Commencez par l'écran de chargement
-  const [currentUser, setCurrentUser] = useState(null); // État pour l'utilisateur actuel
+  const [navSelectionne, setNavSelectionne] = useState("loading");
+  const [currentUser, setCurrentUser] = useState(null); 
   const [artists, setArtists] = useState(ARTISTS);
   const [indexCard, setIndexCard] = useState(0);
   const [genresFav, setGenreFav] = useState(FAV_GENRES_INIT);
@@ -34,67 +34,66 @@ export default function App() {
     const auth = getAuth();
     const unsubscribe = onAuthStateChanged(auth, (user) => {
       if (user) {
-        // Utilisateur connecté
         setCurrentUser(user);
-        setNavSelectionne("profil"); // Naviguer vers le profil de l'utilisateur
-        //recupererDonneesUtilisateur(user.uid); // Charger les données utilisateur
+        setNavSelectionne("profil");
       } else {
-        // Utilisateur non connecté
         setCurrentUser(null);
-        setNavSelectionne("connexion"); // Naviguer vers l'écran de connexion
+        setNavSelectionne("connexion"); 
       }
     });
-    return () => unsubscribe(); // Nettoyer l'abonnement
+    return () => unsubscribe(); 
   }, []);
 
   useEffect(() => {
-    const fetchUserData = async (userId) => {
-      const db = getDatabase();
-      const userRef = ref(db, `usersData/${userId}/${festival.db}`);
-      const snapshot = await get(userRef);
-
-      if (snapshot.exists()) {
-        const userData = snapshot.val();
-        setIndexCard(userData.indexCard || 0);
-        setGenreFav(userData.genresFavoris || FAV_GENRES_INIT);
-
-        const updatedArtists = ARTISTS.map(artist => {
-          const score = userData.scores ? userData.scores[artist.nom] : artist.score;
-          return { ...artist, score };
-        });
-        setArtists(updatedArtists);
-      } else {
-        // Si aucune donnée utilisateur n'existe, utiliser les valeurs par défaut
-        setIndexCard(0);
-        setGenreFav(FAV_GENRES_INIT);
-        setArtists(ARTISTS);
-      }
-    };
-
     const auth = getAuth();
     const unsubscribe = onAuthStateChanged(auth, (user) => {
       if (user) {
         setCurrentUser(user);
-        fetchUserData(user.uid);
         setNavSelectionne("profil");
       } else {
         setCurrentUser(null);
         setNavSelectionne("connexion");
-        // Réinitialiser les états à leurs valeurs par défaut si aucun utilisateur n'est connecté
         setIndexCard(0);
         setGenreFav(FAV_GENRES_INIT);
         setArtists(ARTISTS);
       }
     });
+  
+    return () => unsubscribe(); 
+  }, []); 
 
-    return () => unsubscribe();
-  }, []);
-
+  useEffect(() => {
+    const resetOrFetchUserData = async () => {
+      if (currentUser) {
+        const db = getDatabase();
+        const userRef = ref(db, `usersData/${currentUser.uid}/${festival.db}`);
+        const snapshot = await get(userRef);
+        if (snapshot.exists()) {
+          const userData = snapshot.val();
+          setIndexCard(userData.indexCard || 0);
+          setGenreFav(userData.genresFavoris || FAV_GENRES_INIT);
+  
+          const updatedArtists = ARTISTS.map(artist => {
+            const score = userData.scores ? userData.scores[artist.nom] : artist.score;
+            return { ...artist, score };
+          });
+          setArtists(updatedArtists);
+        } else {
+          setIndexCard(0);
+          setGenreFav(FAV_GENRES_INIT);
+          setArtists(ARTISTS.map(artist => ({ ...artist, score: artist.score }))); 
+        }
+      } else {
+        setIndexCard(0);
+        setGenreFav(FAV_GENRES_INIT);
+        setArtists(ARTISTS.map(artist => ({ ...artist, score: artist.score }))); 
+      }
+    };
+    resetOrFetchUserData();
+  }, [festival, currentUser]); 
 
   const gestionDesScreens = () => {
-    // Vérifier si le festival est sélectionné
     if (!festival || !festival.nom) {
-      // Afficher un message demandant de sélectionner un festival
       switch (navSelectionne) {
         case "profil":
           return <ProfilScreen setNavSelectionne={setNavSelectionne} currentUser={currentUser} setFestival={setFestival} />;
@@ -118,7 +117,6 @@ export default function App() {
           );
       }
     }
-    // Si un festival est sélectionné, continuer avec la logique existante
     switch (navSelectionne) {
       case "card":
         return <CardScreen indexCard={indexCard} setIndexCard={setIndexCard} setArtists={setArtists} genresFav={genresFav} setGenreFav={setGenreFav} festival={festival} />;
