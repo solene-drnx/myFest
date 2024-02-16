@@ -1,7 +1,7 @@
 {
   "expo": {
     "name": "myFest",
-    "slug": "myFest",
+    "slug": "myfest",
     "plugins": [
       [
         "expo-image-picker",
@@ -29,10 +29,25 @@
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#ffffff"
-      }
+      },
+      "permissions": [
+        "android.permission.RECORD_AUDIO"
+      ]
     },
     "web": {
       "favicon": "./assets/favicon.png"
+    },
+    "extra": {
+      "eas": {
+        "projectId": "744fd41a-2f9e-4954-9a98-a8ba85dc42eb"
+      }
+    },
+    "owner": "solene.drnx",
+    "runtimeVersion": {
+      "policy": "appVersion"
+    },
+    "updates": {
+      "url": "https://u.expo.dev/744fd41a-2f9e-4954-9a98-a8ba85dc42eb"
     }
   }
 }
