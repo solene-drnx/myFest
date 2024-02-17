@@ -39,7 +39,7 @@ const DropdownMenu = ({ setFestival }) => {
 const styles = StyleSheet.create({
     container: {
         zIndex: 2,
-        paddingTop: 20,
+        paddingTop: 10,
         alignItems: 'center',
         justifyContent: 'center',
         marginHorizontal: 20,
