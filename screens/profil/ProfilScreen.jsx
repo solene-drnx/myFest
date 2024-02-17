@@ -7,7 +7,7 @@ import { Room } from "../../components/Room/Room";
 
 const auth = getAuth();
 
-export function ProfilScreen({ setNavSelectionne, currentUser, setFestival }) {
+export function ProfilScreen({ setNavSelectionne, currentUser, setFestival, setRoom, setIdRoom }) {
     const [user, setUser] = useState(null);
 
     useEffect(() => {
@@ -52,7 +52,7 @@ export function ProfilScreen({ setNavSelectionne, currentUser, setFestival }) {
                 <DropdownMenu setFestival={setFestival} />
             </View>
             <View style={{borderWidth: 5, borderColor: "rgba(245, 124, 51, 0.2)", borderRadius: 20, marginHorizontal: 20, padding: 10, paddingBottom: 20, marginTop: 10}}>
-                <Room userId={user.uid} />
+                <Room userId={user.uid} setRoom={setRoom} setIdRoom={setIdRoom} setFestival={setFestival}/>
             </View>
             {/*<Text style={{fontFamily: "Montserrat-Medium", marginTop: 20, marginHorizontal: 40}}>Pour démarrer, direction l'onglet 'Cards' situé en bas à gauche, et amusez-vous à swiper quelques cartes.</Text>
             <Text style={{fontFamily: "Montserrat-Medium", marginTop: 15, marginHorizontal: 40}}>Ensuite, faites un petit tour dans l'onglet du milieu pour découvrir le programme qu'on vous a concocté sur mesure.</Text> */}

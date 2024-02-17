@@ -29,6 +29,9 @@ export default function App() {
   const [genresFav, setGenreFav] = useState(FAV_GENRES_INIT);
   const [users, setUsers] = useState(UTILISATEURS);
   const [festival, setFestival] = useState(FESTIVALS.weLoveGreen2023);
+  const [room, setRoom] = useState(false);
+  const [idRoom, setIdRoom] = useState();
+  
 
   useEffect(() => {
     const auth = getAuth();
@@ -93,10 +96,11 @@ export default function App() {
   }, [festival, currentUser]); 
 
   const gestionDesScreens = () => {
-    if (!festival || !festival.nom) {
+    // Si pas de festival sélectionné ou si pas de room sléctionnée 
+    if ((!festival || !festival.nom) && room === false) {
       switch (navSelectionne) {
         case "profil":
-          return <ProfilScreen setNavSelectionne={setNavSelectionne} currentUser={currentUser} setFestival={setFestival} />;
+          return <ProfilScreen setNavSelectionne={setNavSelectionne} currentUser={currentUser} setFestival={setFestival} setRoom={setRoom} setIdRoom={setIdRoom}/>;
         case "inscription":
           return <InscriptionScreen setNavSelectionne={setNavSelectionne} />;
         case "connexion":
@@ -106,22 +110,22 @@ export default function App() {
         case "card":
           return (
             <View style={style.messageContainer}>
-              <Text style={style.messageText}>Veuillez sélectionner un festival dans votre profil pour commencer !</Text>
+              <Text style={style.messageText}>Veuillez sélectionner un festival ou une room dans votre profil pour commencer !</Text>
             </View>
           );
         default:
           return (
             <View style={style.messageContainer}>
-              <Text style={style.messageText}>Veuillez sélectionner un festival dans votre profil pour commencer !</Text>
+              <Text style={style.messageText}>Veuillez sélectionner un festival ou une room dans votre profil pour commencer !</Text>
             </View>
           );
       }
     }
     switch (navSelectionne) {
       case "card":
-        return <CardScreen indexCard={indexCard} setIndexCard={setIndexCard} setArtists={setArtists} genresFav={genresFav} setGenreFav={setGenreFav} festival={festival} />;
+        return <CardScreen indexCard={indexCard} setIndexCard={setIndexCard} setArtists={setArtists} genresFav={genresFav} setGenreFav={setGenreFav} festival={festival}/>;
       case "planning":
-        return <PlanningScreen artists={artists} genresFav={genresFav} users={users} currentUser={currentUser} festival={festival} />
+        return <PlanningScreen artists={artists} genresFav={genresFav} users={users} currentUser={currentUser} festival={festival} room={room}/>
       case "inscription":
         return <InscriptionScreen setNavSelectionne={setNavSelectionne} />;
       case "connexion":
@@ -129,7 +133,7 @@ export default function App() {
       case "loading":
         return <LoadingScreen />;
       default:
-        return <ProfilScreen setNavSelectionne={setNavSelectionne} currentUser={currentUser} setFestival={setFestival} />;
+        return <ProfilScreen setNavSelectionne={setNavSelectionne} currentUser={currentUser} setFestival={setFestival} setRoom={setRoom} setIdRoom={setIdRoom} />;
     }
   };
 

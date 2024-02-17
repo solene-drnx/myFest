@@ -6,7 +6,7 @@ import { CardRepas } from "../../components/CardCalendar/CardRepas";
 import { CardDodo } from "../../components/CardCalendar/CardDodo";
 import { FESTIVALS } from "../../constant";
 
-export function PlanningScreen({ artists, genresFav, users, currentUser, festival }) {
+export function PlanningScreen({ artists, genresFav, users, currentUser, festival, room, idRoom }) {
     const [dateSelected, setDateSelected] = useState("jour1"); 
     let artistsSorted = artists;
 

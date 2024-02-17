@@ -4,27 +4,44 @@ import { getDatabase, ref, push, set, onValue } from "firebase/database";
 import { FESTIVALS, ARTISTS } from '../../constant';
 import DropDownPicker from 'react-native-dropdown-picker';
 
-export function Room({ userId }) {
+export function Room({ userId, setRoom, setIdRoom, setFestival }) {
     const [selectedFestival, setSelectedFestival] = useState('');
     const [isModalVisible, setIsModalVisible] = useState(false);
-    const [open, setOpen] = useState(false); 
+    const [open, setOpen] = useState(false);
     const [openModalPicker, setOpenModalPicker] = useState(false);
     const [items, setItems] = useState(Object.values(FESTIVALS).map(festival => ({ label: festival.nom, value: festival.db })));
     const [selectedRoom, setSelectedRoom] = useState(null);
     const [roomItems, setRoomItems] = useState([]);
-    const [buttonOpacity, setButtonOpacity] = useState(1);
     const [roomName, setRoomName] = useState('');
     const [isJoinModalVisible, setIsJoinModalVisible] = useState(false);
     const [joinRoomCode, setJoinRoomCode] = useState('');
 
     useEffect(() => {
+        if (selectedRoom) {
+            setIdRoom(selectedRoom);
+            setRoom(true);
+            console.log(selectedRoom)
+            const db = getDatabase();
+            const festivalRef = ref(db, `rooms/${selectedRoom}/festival`);
+            onValue(festivalRef, (snapshot) => {
+                const festivalDb = snapshot.val();
+                console.log(festivalDb);
+                if (festivalDb === "solidays2023") {
+                    setFestival(FESTIVALS.solidays);
+                } else {
+                    setFestival(FESTIVALS.weLoveGreen2023)
+                }
+            });
+        }
+    }, [selectedRoom, setIdRoom, setRoom, selectedFestival, setFestival]);
+
+    useEffect(() => {
         const db = getDatabase();
         const roomsRef = ref(db, 'rooms');
 
-        onValue(roomsRef, (snapshot) => {
+        const unsubscribe = onValue(roomsRef, (snapshot) => {
             const rooms = snapshot.val();
             const userRooms = [];
-
             for (let roomId in rooms) {
                 const room = rooms[roomId];
                 if (room.users && room.users[userId]) {
@@ -34,38 +51,45 @@ export function Room({ userId }) {
                     });
                 }
             }
-
             setRoomItems(userRooms);
+            setRoom(true);
         });
-        return () => {
-            // firebase.off('value', roomsRef);
-        };
-    }, [userId]);
+
+        return () => unsubscribe(); // Nettoyage du listener
+    }, [userId, setRoom]);
 
     const joinRoomWithCode = () => {
+        if (!joinRoomCode.trim()) {
+            alert('Veuillez entrer un code valide.');
+            return;
+        }
         const db = getDatabase();
         const roomsRef = ref(db, 'rooms');
+
         onValue(roomsRef, (snapshot) => {
             const rooms = snapshot.val();
             let roomExists = false;
-            Object.keys(rooms).forEach((roomId) => {
+            for (let roomId in rooms) {
                 if (rooms[roomId].code === joinRoomCode) {
                     roomExists = true;
                     const userRoomRef = ref(db, `rooms/${roomId}/users/${userId}`);
-                    set(userRoomRef, true).then(() => {
-                        alert('🥳 Vous avez rejoint la room avec succès ! Sélectionnez-la pour commencer à swiper');
-                        setIsJoinModalVisible(false); 
-                    }).catch((error) => alert('Erreur lors de la tentative de rejoindre la room.'));
+                    set(userRoomRef, true)
+                        .then(() => {
+                            alert('🥳 Vous avez rejoint la room avec succès ! Sélectionnez-la pour commencer à swiper');
+                            setIsJoinModalVisible(false);
+                        })
+                        .catch((error) => {
+                            alert('Erreur lors de la tentative de rejoindre la room.');
+                            console.error("Erreur :", error);
+                        });
+                    break; // Sortie de la boucle une fois la room trouvée
                 }
-            });
+            }
             if (!roomExists) {
                 alert('Aucune Room trouvée avec ce code 🥸');
             }
-        }, {
-            onlyOnce: true
-        });
+        }, { onlyOnce: true });
     };
-
 
     function createRoom() {
         if (!selectedFestival || roomName.length === 0 || roomName.length > 20) {
@@ -81,30 +105,21 @@ export function Room({ userId }) {
 
         const db = getDatabase();
         const roomRef = push(ref(db, 'rooms'));
-        const roomId = roomRef.key;
         const roomCode = generateRoomCode();
-        const usersInRoom = {
-            [userId]: true,
-        };
 
         set(roomRef, {
-            name: roomName, 
+            name: roomName,
             code: roomCode,
-            users: usersInRoom,
+            users: { [userId]: true },
             festival: selectedFestival,
             artists: festivalArtists,
         }).then(() => {
-            alert(`La room ${roomName} a été créée avec succès. \n \nCode de la room : ${roomCode}`);
+            alert(`La room ${roomName} a été créée avec succès. \nCode de la room : ${roomCode}`);
         }).catch((error) => {
-            console.error("Erreur lors de la création de la room : ", error);
+            console.error("Erreur lors de la création de la room :", error);
             alert("Erreur lors de la création de la room. Veuillez réessayer.");
         });
-    
-
-        console.log({ roomId, roomCode });
     }
-
-
 
     function generateRoomCode() {
         return Math.random().toString(36).substring(2, 7).toUpperCase();
@@ -126,7 +141,7 @@ export function Room({ userId }) {
                         style={styles.pickerStyle}
                         dropDownContainerStyle={{
                             ...styles.dropDownPickerStyle,
-                            maxHeight: 90, 
+                            maxHeight: 90,
                         }}
                         labelStyle={styles.labelStyle}
                     />
@@ -148,7 +163,7 @@ export function Room({ userId }) {
                             placeholder="Nom de la room (max 20 caractères)"
                             onChangeText={setRoomName}
                             value={roomName}
-                            maxLength={20} 
+                            maxLength={20}
                         />
                         <Text style={{ fontFamily: "Montserrat-Medium", color: "#F57C33", marginBottom: 5 }}>Sélectionner un festival</Text>
                         <DropDownPicker
@@ -156,13 +171,20 @@ export function Room({ userId }) {
                             value={selectedFestival}
                             items={items}
                             setOpen={setOpenModalPicker}
-                            setValue={setSelectedFestival}
+                            setValue={(value) => {
+                                setSelectedFestival(value);
+                                // Trouvez les données complètes du festival sélectionné
+                                const selectedFestivalData = FESTIVALS.find(f => f.db === value);
+                                // Mettez à jour l'état du festival avec les données complètes
+                                setFestival(selectedFestivalData);
+                            }}
                             setItems={setItems}
                             style={styles.dropdownPicker}
                             placeholder="Sélectionnez un festival"
                             dropDownContainerStyle={styles.dropDownPickerStyle}
                             labelStyle={styles.labelStyle}
                         />
+
                         <TouchableOpacity
                             style={styles.button}
                             onPress={() => {
