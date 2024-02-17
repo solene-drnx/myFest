@@ -10,7 +10,7 @@ export function CardCalendar({ artist, users, currentUserProfileImage }) {
                 <Text style={style.text_nom_calendar}>{artist.nom}</Text>
                 <View style={style.container_infos}>
                     <Image source={iconLieu} style={style.icon_calendar} />
-                    <Text style={style.text_infos}>Scène {artist.lieu}</Text>
+                    <Text style={style.text_infos}>Score : {artist.score}</Text>
                 </View>
                 <View style={style.container_infos}>
                     <Image source={iconClock} style={style.icon_calendar} />

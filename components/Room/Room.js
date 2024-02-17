@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { Text, View, StyleSheet, TouchableOpacity, Modal, Button, Platform, TextInput } from "react-native";
-import { getDatabase, ref, push, set, onValue } from "firebase/database";
+import { getDatabase, ref, onValue, set, push, update } from "firebase/database";
 import { FESTIVALS, ARTISTS } from '../../constant';
 import DropDownPicker from 'react-native-dropdown-picker';
+import { fetchSignInMethodsForEmail } from 'firebase/auth';
 
 export function Room({ userId, setRoom, setIdRoom, setFestival }) {
     const [selectedFestival, setSelectedFestival] = useState('');
@@ -15,6 +16,50 @@ export function Room({ userId, setRoom, setIdRoom, setFestival }) {
     const [roomName, setRoomName] = useState('');
     const [isJoinModalVisible, setIsJoinModalVisible] = useState(false);
     const [joinRoomCode, setJoinRoomCode] = useState('');
+
+    useEffect(() => {
+        if (selectedRoom) {
+            const db = getDatabase();
+            const festivalRef = ref(db, `rooms/${selectedRoom}/festival`);
+            
+            const festivalListener = onValue(festivalRef, (snapshot) => {
+                const festivalDb = snapshot.val();
+                const roomUsersRef = ref(db, `rooms/${selectedRoom}/users`);
+                
+                const usersListener = onValue(roomUsersRef, (usersSnapshot) => {
+                    const users = usersSnapshot.val();
+                    const scoresByArtist = {};
+    
+                    const userScoreUpdates = Object.keys(users).map((userId) => {
+                        return new Promise((resolve) => {
+                            const userArtistsRef = ref(db, `usersData/${userId}/${festivalDb}/scores`);
+                            onValue(userArtistsRef, (userSnapshot) => {
+                                const userArtists = userSnapshot.val() || {};
+                                Object.keys(userArtists).forEach((artistName) => {
+                                    scoresByArtist[artistName] = (scoresByArtist[artistName] || 0) + userArtists[artistName];
+                                });
+                                resolve();
+                            }, { onlyOnce: true }); // Utilisez { onlyOnce: true } pour annuler l'écoute après la première récupération
+                        });
+                    });
+    
+                    Promise.all(userScoreUpdates).then(() => {
+                        console.log("scoresByArtist:", scoresByArtist);
+                        // Mise à jour du score total de la room
+                        const roomArtistsRef = ref(db, `rooms/${selectedRoom}/artists`);
+                        update(roomArtistsRef, scoresByArtist).then(() => {
+                            console.log("Scores de la room mis à jour avec succès.");
+                        }).catch((error) => {
+                            console.error("Erreur lors de la mise à jour des scores de la room :", error);
+                        });
+                    });
+                }, { onlyOnce: true }); // Utilisez { onlyOnce: true } ici aussi
+    
+            }, { onlyOnce: true }); // Et ici pour s'assurer que l'écoute est annulée après la première récupération
+        }
+    }, [selectedRoom]);
+    
+
 
     useEffect(() => {
         if (selectedRoom) {
@@ -52,7 +97,6 @@ export function Room({ userId, setRoom, setIdRoom, setFestival }) {
                 }
             }
             setRoomItems(userRooms);
-            setRoom(true);
         });
 
         return () => unsubscribe(); // Nettoyage du listener
@@ -171,13 +215,7 @@ export function Room({ userId, setRoom, setIdRoom, setFestival }) {
                             value={selectedFestival}
                             items={items}
                             setOpen={setOpenModalPicker}
-                            setValue={(value) => {
-                                setSelectedFestival(value);
-                                // Trouvez les données complètes du festival sélectionné
-                                const selectedFestivalData = FESTIVALS.find(f => f.db === value);
-                                // Mettez à jour l'état du festival avec les données complètes
-                                setFestival(selectedFestivalData);
-                            }}
+                            setValue={setSelectedFestival}
                             setItems={setItems}
                             style={styles.dropdownPicker}
                             placeholder="Sélectionnez un festival"

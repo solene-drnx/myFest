@@ -23,7 +23,7 @@ export default function App() {
     "Montserrat-Medium": montserratMedium,
   });
   const [navSelectionne, setNavSelectionne] = useState("loading");
-  const [currentUser, setCurrentUser] = useState(null); 
+  const [currentUser, setCurrentUser] = useState(null);
   const [artists, setArtists] = useState(ARTISTS);
   const [indexCard, setIndexCard] = useState(0);
   const [genresFav, setGenreFav] = useState(FAV_GENRES_INIT);
@@ -31,8 +31,8 @@ export default function App() {
   const [festival, setFestival] = useState(FESTIVALS.weLoveGreen2023);
   const [room, setRoom] = useState(false);
   const [idRoom, setIdRoom] = useState();
-  
 
+  // Changement d'utilisateur
   useEffect(() => {
     const auth = getAuth();
     const unsubscribe = onAuthStateChanged(auth, (user) => {
@@ -41,10 +41,10 @@ export default function App() {
         setNavSelectionne("profil");
       } else {
         setCurrentUser(null);
-        setNavSelectionne("connexion"); 
+        setNavSelectionne("connexion");
       }
     });
-    return () => unsubscribe(); 
+    return () => unsubscribe();
   }, []);
 
   useEffect(() => {
@@ -61,9 +61,9 @@ export default function App() {
         setArtists(ARTISTS);
       }
     });
-  
-    return () => unsubscribe(); 
-  }, []); 
+
+    return () => unsubscribe();
+  }, []);
 
   useEffect(() => {
     const resetOrFetchUserData = async () => {
@@ -75,7 +75,7 @@ export default function App() {
           const userData = snapshot.val();
           setIndexCard(userData.indexCard || 0);
           setGenreFav(userData.genresFavoris || FAV_GENRES_INIT);
-  
+
           const updatedArtists = ARTISTS.map(artist => {
             const score = userData.scores ? userData.scores[artist.nom] : artist.score;
             return { ...artist, score };
@@ -84,23 +84,23 @@ export default function App() {
         } else {
           setIndexCard(0);
           setGenreFav(FAV_GENRES_INIT);
-          setArtists(ARTISTS.map(artist => ({ ...artist, score: artist.score }))); 
+          setArtists(ARTISTS.map(artist => ({ ...artist, score: artist.score })));
         }
       } else {
         setIndexCard(0);
         setGenreFav(FAV_GENRES_INIT);
-        setArtists(ARTISTS.map(artist => ({ ...artist, score: artist.score }))); 
+        setArtists(ARTISTS.map(artist => ({ ...artist, score: artist.score })));
       }
-    };
+    }; 
     resetOrFetchUserData();
-  }, [festival, currentUser]); 
+  }, [festival, currentUser]);
 
   const gestionDesScreens = () => {
     // Si pas de festival sélectionné ou si pas de room sléctionnée 
     if ((!festival || !festival.nom) && room === false) {
       switch (navSelectionne) {
         case "profil":
-          return <ProfilScreen setNavSelectionne={setNavSelectionne} currentUser={currentUser} setFestival={setFestival} setRoom={setRoom} setIdRoom={setIdRoom}/>;
+          return <ProfilScreen setNavSelectionne={setNavSelectionne} currentUser={currentUser} setFestival={setFestival} setRoom={setRoom} setIdRoom={setIdRoom} />;
         case "inscription":
           return <InscriptionScreen setNavSelectionne={setNavSelectionne} />;
         case "connexion":
@@ -120,20 +120,21 @@ export default function App() {
             </View>
           );
       }
-    }
-    switch (navSelectionne) {
-      case "card":
-        return <CardScreen indexCard={indexCard} setIndexCard={setIndexCard} setArtists={setArtists} genresFav={genresFav} setGenreFav={setGenreFav} festival={festival}/>;
-      case "planning":
-        return <PlanningScreen artists={artists} genresFav={genresFav} users={users} currentUser={currentUser} festival={festival} room={room}/>
-      case "inscription":
-        return <InscriptionScreen setNavSelectionne={setNavSelectionne} />;
-      case "connexion":
-        return <ConnexionScreen setNavSelectionne={setNavSelectionne} />;
-      case "loading":
-        return <LoadingScreen />;
-      default:
-        return <ProfilScreen setNavSelectionne={setNavSelectionne} currentUser={currentUser} setFestival={setFestival} setRoom={setRoom} setIdRoom={setIdRoom} />;
+    } else {
+      switch (navSelectionne) {
+        case "card":
+          return <CardScreen indexCard={indexCard} setIndexCard={setIndexCard} setArtists={setArtists} genresFav={genresFav} setGenreFav={setGenreFav} festival={festival} />;
+        case "planning":
+          return <PlanningScreen artists={artists} genresFav={genresFav} users={users} currentUser={currentUser} festival={festival} room={room} />
+        case "inscription":
+          return <InscriptionScreen setNavSelectionne={setNavSelectionne} />;
+        case "connexion":
+          return <ConnexionScreen setNavSelectionne={setNavSelectionne} />;
+        case "loading":
+          return <LoadingScreen />;
+        default:
+          return <ProfilScreen setNavSelectionne={setNavSelectionne} currentUser={currentUser} setFestival={setFestival} setRoom={setRoom} setIdRoom={setIdRoom} />;
+      }
     }
   };
 

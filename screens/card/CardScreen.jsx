@@ -8,7 +8,7 @@ import { Asset } from 'expo-asset';
 import { getDatabase, ref, update, get, set } from "firebase/database";
 import { getAuth } from "firebase/auth";
 
-export function CardScreen({ indexCard, setIndexCard, setArtists, genresFav, setGenreFav, festival}) {
+export function CardScreen({ indexCard, setIndexCard, setArtists, genresFav, setGenreFav, festival, room, idRoom }) {
     const [data, setData] = useState([]);
     const [loading, setLoading] = useState(true);
 
@@ -16,12 +16,12 @@ export function CardScreen({ indexCard, setIndexCard, setArtists, genresFav, set
         const fetchIndexCard = async () => {
             const auth = getAuth();
             const user = auth.currentUser;
-    
+
             if (user && festival) {
                 const db = getDatabase();
                 const userId = user.uid;
                 const indexCardRef = ref(db, `usersData/${userId}/${festival.db}/indexCard`);
-    
+
                 try {
                     const snapshot = await get(indexCardRef);
                     if (snapshot.exists()) {
@@ -38,33 +38,33 @@ export function CardScreen({ indexCard, setIndexCard, setArtists, genresFav, set
         const filteredArtists = ARTISTS.filter(artist => artist.infoFestival.festival.nom === festival.nom);
         setData(filteredArtists);
         fetchIndexCard();
-    }, [festival]); 
-    
+    }, [festival]);
+
 
     useEffect(() => {
         const preloadImages = async () => {
             const imageSources = ARTISTS.filter(artist => artist.infoFestival.festival.nom === festival.nom)
-                                        .map(artist => artist.image);
+                .map(artist => artist.image);
             const promises = imageSources.map(image => Asset.fromModule(image).downloadAsync());
             await Promise.all(promises);
             console.log('Images préchargées pour le festival actuel');
         };
-    
+
         if (festival) {
             preloadImages();
         }
-    }, [festival]); 
-    
+    }, [festival]);
+
 
     const enregistrerDonneesUtilisateur = async (artistName, newScore) => {
         const auth = getAuth();
         const user = auth.currentUser;
-    
+
         if (user) {
             const userId = user.uid;
             const db = getDatabase();
             const scoresRef = ref(db, `usersData/${userId}/${festival.db}/scores`);
-    
+
             try {
                 const snapshot = await get(scoresRef);
                 if (snapshot.exists()) {
@@ -85,12 +85,12 @@ export function CardScreen({ indexCard, setIndexCard, setArtists, genresFav, set
     const enregistrerGenreFav = async (genresFav) => {
         const auth = getAuth();
         const user = auth.currentUser;
-    
+
         if (user) {
             const userId = user.uid;
             const db = getDatabase();
             const genreFavRef = ref(db, `usersData/${userId}/${festival.db}/genresFavoris`);
-    
+
             try {
                 await set(genreFavRef, genresFav);
                 console.log("Genres favoris enregistrés (ou écrasés) avec succès dans Realtime Database !");
@@ -105,12 +105,12 @@ export function CardScreen({ indexCard, setIndexCard, setArtists, genresFav, set
     const enregistrerIndexCard = async (nouvelIndex) => {
         const auth = getAuth();
         const user = auth.currentUser;
-    
+
         if (user) {
             const userId = user.uid;
             const db = getDatabase();
             const indexCardRef = ref(db, `usersData/${userId}/${festival.db}/indexCard`);
-    
+
             try {
                 await set(indexCardRef, nouvelIndex);
                 console.log("IndexCard enregistré avec succès dans Realtime Database !");
@@ -120,8 +120,8 @@ export function CardScreen({ indexCard, setIndexCard, setArtists, genresFav, set
         } else {
             console.log("Aucun utilisateur connecté pour enregistrer l'indexCard.");
         }
-    }; 
-    
+    };
+
     const preloadImages = async () => {
         const imageSources = ARTISTS.map(artist => artist.image);
         const promises = imageSources.map(image => Asset.fromModule(image).downloadAsync());
@@ -137,31 +137,69 @@ export function CardScreen({ indexCard, setIndexCard, setArtists, genresFav, set
 
     useEffect(() => {
         if (indexCard === festival.taille) {
-            setIndexCard(0); 
-            enregistrerIndexCard(0); 
+            setIndexCard(0);
+            enregistrerIndexCard(0);
         }
-    
+
         const timer = setTimeout(() => {
             setLoading(false);
         }, 10000);
-    
-        return () => clearTimeout(timer); 
+
+        return () => clearTimeout(timer);
     }, [indexCard, data]);
 
 
     const updateScore = (artistName, increment) => {
-        setArtists(currentArtists =>
-            currentArtists.map(artist => {
-                if (artist.nom === artistName) {
-                    return { ...artist, score: increment };
-                }
-                return artist;
-            })
-        );
         enregistrerDonneesUtilisateur(artistName, increment);
+        if (room === false) {
+            setArtists(currentArtists =>
+                currentArtists.map(artist => {
+                    if (artist.nom === artistName) {
+                        return { ...artist, score: increment };
+                    }
+                    return artist;
+                })
+            );
+        } else {
+            const fetchScoresAndSetArtists = async () => {
+                const db = getDatabase();
+                if (room && idRoom) {
+                    // Récupération des utilisateurs de la room
+                    const roomRef = ref(db, `rooms/${idRoom}/users`);
+                    const roomSnapshot = await get(roomRef);
+                    if (roomSnapshot.exists()) {
+                        const roomUsers = roomSnapshot.val();
+                        const userScoresPromises = Object.keys(roomUsers).map(userId =>
+                            get(ref(db, `usersData/${userId}/${festival.db}/scores`))
+                        );
+
+                        const scoresSnapshots = await Promise.all(userScoresPromises);
+                        const totalScores = {};
+
+                        scoresSnapshots.forEach(snapshot => {
+                            if (snapshot.exists()) {
+                                const userScores = snapshot.val();
+                                Object.keys(userScores).forEach(artistName => {
+                                    if (!totalScores[artistName]) totalScores[artistName] = 0;
+                                    totalScores[artistName] += userScores[artistName];
+                                });
+                            }
+                        });
+
+                        // Mise à jour des artistes avec les scores totaux
+                        const updatedArtists = ARTISTS.map(artist => ({
+                            ...artist,
+                            score: totalScores[artist.nom] || artist.score,
+                        }));
+                        setArtists(updatedArtists);
+                    }
+                }
+            }
+            fetchScoresAndSetArtists();
+        }
     };
-    
-    
+
+
 
     const swipe = useRef(new Animated.ValueXY()).current;
     const panResponser = PanResponder.create({
@@ -211,7 +249,7 @@ export function CardScreen({ indexCard, setIndexCard, setArtists, genresFav, set
             const updatedGenres = { ...currentGenres };
             artistGenres.forEach(genre => {
                 if (updatedGenres[genre]) {
-                    updatedGenres[genre] += increment; 
+                    updatedGenres[genre] += increment;
                 } else {
                     updatedGenres[genre] = increment;
                 }
@@ -220,8 +258,8 @@ export function CardScreen({ indexCard, setIndexCard, setArtists, genresFav, set
         });
         enregistrerGenreFav(genresFav);
     };
-    
-    
+
+
 
 
     const swipeLeft = () => {
@@ -244,7 +282,7 @@ export function CardScreen({ indexCard, setIndexCard, setArtists, genresFav, set
         }).start(() => {
             removeCard();
             updateScore(data[indexCard].nom, 1);
-            ajoutGenre(data[indexCard].genre, 1); 
+            ajoutGenre(data[indexCard].genre, 1);
         });
     };
 
