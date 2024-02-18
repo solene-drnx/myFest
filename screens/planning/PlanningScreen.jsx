@@ -4,11 +4,41 @@ import { style } from "./PlanningScreen_style";
 import { CardCalendar } from "../../components/CardCalendar/CardCalendar";
 import { CardRepas } from "../../components/CardCalendar/CardRepas";
 import { CardDodo } from "../../components/CardCalendar/CardDodo";
-import { FESTIVALS } from "../../constant";
+import { FESTIVALS, ARTISTS } from "../../constant";
+import { getDatabase, ref, get } from "firebase/database";
 
-export function PlanningScreen({ artists, genresFav, users, currentUser, festival, room, idRoom }) {
+export function PlanningScreen({ artists, genresFav, users, currentUser, festival, room, idRoom, setArtists }) {
     const [dateSelected, setDateSelected] = useState("jour1");
     let artistsSorted = artists;
+
+    useEffect(() => {
+        const resetOrFetchMultyUser = async () => {
+            if (currentUser) {
+                console.log("fonction lancée 🥸");
+                const db = getDatabase();
+                const userRef = ref(db, `rooms/${idRoom}`);
+                const snapshot = await get(userRef);
+                console.log(snapshot);
+                if (snapshot.exists()) {
+                    const userData = snapshot.val();
+                    const updatedArtists = ARTISTS.map(artist => {
+                        const score = userData.artists ? userData.artists[artist.nom] : artist.score;
+                        return { ...artist, score };
+                    });
+                    setArtists(updatedArtists);
+                } else {
+                    setArtists(ARTISTS.map(artist => ({ ...artist, score: artist.score })));
+                }
+            } else {
+                setArtists(ARTISTS.map(artist => ({ ...artist, score: artist.score })));
+            }
+        };
+
+        if (room===true) {
+            resetOrFetchMultyUser();
+            artistsSorted = artists;
+        }
+    }, [currentUser, idRoom, room])
 
     function choisirCarteSurGenres(cardA, cardB, genreFav) {
         const scoreA = cardA.genre.reduce((acc, genre) => acc + (genreFav[genre] || 0), 0) / cardA.genre.length;

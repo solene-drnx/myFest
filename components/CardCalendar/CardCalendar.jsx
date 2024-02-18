@@ -19,7 +19,6 @@ export function CardCalendar({ artist, users, currentUserProfileImage, room, idR
                     if (snapshotRoomUsers.exists()) {
                         const roomUsers = snapshotRoomUsers.val();
                         const userIds = Object.keys(roomUsers);
-                        console.log(roomUsers); // Pour confirmer les données
 
                         const userProfilePromises = userIds.map(async (userId) => {
                             const scoreRef = ref(db, `usersData/${userId}/${festival.db}/scores/${artist.nom}`);
@@ -27,7 +26,6 @@ export function CardCalendar({ artist, users, currentUserProfileImage, room, idR
 
                             if (snapshotScore.exists()) {
                                 const score = snapshotScore.val();
-                                console.log(roomUsers[userId]); // Afficher l'URL de la photo directement
                                 if (score === 1 || score === 4) {
                                     return roomUsers[userId]; // Retourner l'URL directement
                                 }
@@ -58,7 +56,7 @@ export function CardCalendar({ artist, users, currentUserProfileImage, room, idR
                     <Text style={style.text_nom_calendar}>{artist.nom}</Text>
                     <View style={style.container_infos}>
                         <Image source={iconLieu} style={style.icon_calendar} />
-                        <Text style={style.text_infos}>Score : {artist.score}</Text>
+                        <Text style={style.text_infos}>Scène {artist.lieu}</Text>
                     </View>
                     <View style={style.container_infos}>
                         <Image source={iconClock} style={style.icon_calendar} />

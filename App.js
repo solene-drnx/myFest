@@ -168,7 +168,7 @@ export default function App() {
         case "card":
           return <CardScreen indexCard={indexCard} setIndexCard={setIndexCard} setArtists={setArtists} genresFav={genresFav} setGenreFav={setGenreFav} festival={festival} room={room} idRoom={idRoom} artists={artists}/>;
         case "planning":
-          return <PlanningScreen artists={artists} genresFav={genresFav} users={users} currentUser={currentUser} festival={festival} room={room} idRoom={idRoom}/>
+          return <PlanningScreen artists={artists} genresFav={genresFav} users={users} currentUser={currentUser} festival={festival} room={room} idRoom={idRoom} setArtists={setArtists}/>
         case "inscription":
           return <InscriptionScreen setNavSelectionne={setNavSelectionne} />;
         case "connexion":

@@ -47,12 +47,12 @@ export function ProfilScreen({ setNavSelectionne, currentUser, setFestival, setR
                 <Text>No profile picture</Text>
             )}
             <Text style={{ fontFamily: "Montserrat-Black", fontSize: 24, color: "#F57C33", marginHorizontal: 40, marginBottom: 20 }}>Hello {user.displayName || user.email || "User"} 👋</Text>
-            <View style={{borderWidth: 5, borderColor: "rgba(245, 124, 51, 0.2)", borderRadius: 20, marginHorizontal: 20, padding: 10, paddingBottom: 10, paddingBottom: 20, zIndex: 2}}>
+            <View style={{ borderWidth: 5, borderColor: "rgba(245, 124, 51, 0.2)", borderRadius: 20, marginHorizontal: 20, padding: 10, paddingBottom: 10, paddingBottom: 20, zIndex: 2 }}>
                 <Text style={{ fontFamily: "Montserrat-Black", fontSize: 18, marginLeft: 20, color: "#F57C33" }}>Je festivale solo </Text>
-                <DropdownMenu setFestival={setFestival} setRoom={setRoom}/>
+                <DropdownMenu setFestival={setFestival} setRoom={setRoom} />
             </View>
-            <View style={{borderWidth: 5, borderColor: "rgba(245, 124, 51, 0.2)", borderRadius: 20, marginHorizontal: 20, padding: 10, paddingBottom: 20, marginTop: 10}}>
-                <Room userId={user.uid} setRoom={setRoom} setIdRoom={setIdRoom} setFestival={setFestival} user={user}/>
+            <View style={{ borderWidth: 5, borderColor: "rgba(245, 124, 51, 0.2)", borderRadius: 20, marginHorizontal: 20, padding: 10, paddingBottom: 20, marginTop: 10 }}>
+                <Room userId={user.uid} setRoom={setRoom} setIdRoom={setIdRoom} setFestival={setFestival} user={user} />
             </View>
             {/*<Text style={{fontFamily: "Montserrat-Medium", marginTop: 20, marginHorizontal: 40}}>Pour démarrer, direction l'onglet 'Cards' situé en bas à gauche, et amusez-vous à swiper quelques cartes.</Text>
             <Text style={{fontFamily: "Montserrat-Medium", marginTop: 15, marginHorizontal: 40}}>Ensuite, faites un petit tour dans l'onglet du milieu pour découvrir le programme qu'on vous a concocté sur mesure.</Text> */}
