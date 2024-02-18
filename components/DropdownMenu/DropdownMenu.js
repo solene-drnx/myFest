@@ -3,7 +3,7 @@ import { View, StyleSheet } from 'react-native';
 import DropDownPicker from 'react-native-dropdown-picker';
 import { FESTIVALS } from '../../constant';
 
-const DropdownMenu = ({ setFestival }) => {
+const DropdownMenu = ({ setFestival, setRoom }) => {
     const [open, setOpen] = useState(false);
     const [value, setValue] = useState(null); 
     const [items, setItems] = useState([
@@ -14,6 +14,8 @@ const DropdownMenu = ({ setFestival }) => {
 
     useEffect(() => {
         setFestival(value);
+        setRoom(false);
+
     }, [value, setFestival]);
 
     return (

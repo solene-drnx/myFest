@@ -5,10 +5,10 @@ import TinderCard from "../../components/TinderCard/TinderCard";
 import iconCroix from "../../assets/iconCroix.png";
 import iconCoeur from "../../assets/iconCoeur.png";
 import { Asset } from 'expo-asset';
-import { getDatabase, ref, update, get, set } from "firebase/database";
+import { getDatabase, ref, onValue, get, set, push, update } from "firebase/database";
 import { getAuth } from "firebase/auth";
 
-export function CardScreen({ indexCard, setIndexCard, setArtists, genresFav, setGenreFav, festival, room, idRoom }) {
+export function CardScreen({ indexCard, setIndexCard, setArtists, genresFav, setGenreFav, festival, room, idRoom, artists }) {
     const [data, setData] = useState([]);
     const [loading, setLoading] = useState(true);
 
@@ -148,58 +148,72 @@ export function CardScreen({ indexCard, setIndexCard, setArtists, genresFav, set
         return () => clearTimeout(timer);
     }, [indexCard, data]);
 
-
-    const updateScore = (artistName, increment) => {
-        enregistrerDonneesUtilisateur(artistName, increment);
-        if (room === false) {
-            setArtists(currentArtists =>
-                currentArtists.map(artist => {
-                    if (artist.nom === artistName) {
-                        return { ...artist, score: increment };
-                    }
-                    return artist;
-                })
-            );
-        } else {
-            const fetchScoresAndSetArtists = async () => {
-                const db = getDatabase();
-                if (room && idRoom) {
-                    // Récupération des utilisateurs de la room
-                    const roomRef = ref(db, `rooms/${idRoom}/users`);
-                    const roomSnapshot = await get(roomRef);
-                    if (roomSnapshot.exists()) {
-                        const roomUsers = roomSnapshot.val();
-                        const userScoresPromises = Object.keys(roomUsers).map(userId =>
-                            get(ref(db, `usersData/${userId}/${festival.db}/scores`))
-                        );
-
-                        const scoresSnapshots = await Promise.all(userScoresPromises);
-                        const totalScores = {};
-
-                        scoresSnapshots.forEach(snapshot => {
-                            if (snapshot.exists()) {
-                                const userScores = snapshot.val();
-                                Object.keys(userScores).forEach(artistName => {
-                                    if (!totalScores[artistName]) totalScores[artistName] = 0;
-                                    totalScores[artistName] += userScores[artistName];
-                                });
-                            }
-                        });
-
-                        // Mise à jour des artistes avec les scores totaux
-                        const updatedArtists = ARTISTS.map(artist => ({
-                            ...artist,
-                            score: totalScores[artist.nom] || artist.score,
-                        }));
-                        setArtists(updatedArtists);
-                    }
+    const updateScore = async (artistName, increment) => {
+        const auth = getAuth();
+        const currentUser = auth.currentUser;
+        const db = getDatabase();
+    
+        if (!currentUser) {
+            console.log("Aucun utilisateur connecté.");
+            return;
+        }
+    
+        if (!room) {
+            setArtists(currentArtists => currentArtists.map(artist => {
+                if (artist.nom === artistName) {
+                    return { ...artist, score: increment };
+                }
+                return artist;
+            }));
+            await enregistrerDonneesUtilisateur(artistName, increment);
+        } else { 
+            await enregistrerDonneesUtilisateur(artistName, increment);
+    
+            const roomUsersRef = ref(db, `rooms/${idRoom}/users`);
+            const usersSnapshot = await get(roomUsersRef);
+            if (!usersSnapshot.exists()) {
+                console.log("Aucun utilisateur trouvé dans la room.");
+                return;
+            }
+    
+            const users = usersSnapshot.val();
+            const scoresByArtist = {};
+    
+            for (const userId of Object.keys(users)) {
+                const userArtistsRef = ref(db, `usersData/${userId}/${festival.db}/scores`);
+                const userSnapshot = await get(userArtistsRef);
+                const userArtists = userSnapshot.val() || {};
+    
+                for (const [artistName, score] of Object.entries(userArtists)) {
+                    scoresByArtist[artistName] = (scoresByArtist[artistName] || 0) + score;
                 }
             }
-            fetchScoresAndSetArtists();
+    
+            const roomArtistsRef = ref(db, `rooms/${idRoom}/artists`);
+            await update(roomArtistsRef, scoresByArtist);
+            console.log("Scores de la room mis à jour avec succès.");
+
+            await resetOrFetchMultyUser();
         }
     };
-
-
+    
+    const resetOrFetchMultyUser = async () => {
+        const db = getDatabase();
+        const roomRef = ref(db, `rooms/${idRoom}`);
+        const snapshot = await get(roomRef);
+    
+        if (snapshot.exists()) {
+            const roomData = snapshot.val();
+            const updatedArtists = ARTISTS.map(artist => {
+                const score = roomData.artists && roomData.artists[artist.nom] ? roomData.artists[artist.nom] : artist.score;
+                return { ...artist, score };
+            });
+            setArtists(updatedArtists);
+        } else {
+            console.log("Les données de la room n'existent pas ou ont été supprimées.");
+        }
+    };
+    
 
     const swipe = useRef(new Animated.ValueXY()).current;
     const panResponser = PanResponder.create({

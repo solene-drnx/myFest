@@ -92,8 +92,51 @@ export default function App() {
         setArtists(ARTISTS.map(artist => ({ ...artist, score: artist.score })));
       }
     }; 
-    resetOrFetchUserData();
-  }, [festival, currentUser]);
+
+    const resetOrFetchIndex = async () => {
+      if (currentUser) {
+        const db = getDatabase();
+        const userRef = ref(db, `usersData/${currentUser.uid}/${festival.db}`);
+        const snapshot = await get(userRef);
+        if (snapshot.exists()) {
+          const userData = snapshot.val();
+          setIndexCard(userData.indexCard || 0);
+        } else {
+          setIndexCard(0);
+        }
+      } else {
+        setIndexCard(0);
+      }
+    }; 
+
+    const resetOrFetchMultyUser = async () => {
+      if (currentUser) {
+        const db = getDatabase();
+        const userRef = ref(db, `rooms/${idRoom}`);
+        const snapshot = await get(userRef);
+        if (snapshot.exists()) {
+          const userData = snapshot.val();
+          const updatedArtists = ARTISTS.map(artist => {
+            const score = userData.artists ? userData.artists[artist.nom] : artist.score;
+            return { ...artist, score };
+          });
+          setArtists(updatedArtists);
+        } else {
+          setArtists(ARTISTS.map(artist => ({ ...artist, score: artist.score })));
+        }
+      } else {
+        setArtists(ARTISTS.map(artist => ({ ...artist, score: artist.score })));
+      }
+    }; 
+
+    if (room === false) {
+      resetOrFetchUserData();
+    } else {
+      resetOrFetchIndex();
+      resetOrFetchMultyUser();
+    }
+    
+  }, [festival, currentUser, idRoom]);
 
   const gestionDesScreens = () => {
     // Si pas de festival sélectionné ou si pas de room sléctionnée 
@@ -123,9 +166,9 @@ export default function App() {
     } else {
       switch (navSelectionne) {
         case "card":
-          return <CardScreen indexCard={indexCard} setIndexCard={setIndexCard} setArtists={setArtists} genresFav={genresFav} setGenreFav={setGenreFav} festival={festival} />;
+          return <CardScreen indexCard={indexCard} setIndexCard={setIndexCard} setArtists={setArtists} genresFav={genresFav} setGenreFav={setGenreFav} festival={festival} room={room} idRoom={idRoom} artists={artists}/>;
         case "planning":
-          return <PlanningScreen artists={artists} genresFav={genresFav} users={users} currentUser={currentUser} festival={festival} room={room} />
+          return <PlanningScreen artists={artists} genresFav={genresFav} users={users} currentUser={currentUser} festival={festival} room={room} idRoom={idRoom}/>
         case "inscription":
           return <InscriptionScreen setNavSelectionne={setNavSelectionne} />;
         case "connexion":

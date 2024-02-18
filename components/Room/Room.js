@@ -5,7 +5,7 @@ import { FESTIVALS, ARTISTS } from '../../constant';
 import DropDownPicker from 'react-native-dropdown-picker';
 import { fetchSignInMethodsForEmail } from 'firebase/auth';
 
-export function Room({ userId, setRoom, setIdRoom, setFestival }) {
+export function Room({ userId, setRoom, setIdRoom, setFestival, user}) {
     const [selectedFestival, setSelectedFestival] = useState('');
     const [isModalVisible, setIsModalVisible] = useState(false);
     const [open, setOpen] = useState(false);
@@ -117,7 +117,7 @@ export function Room({ userId, setRoom, setIdRoom, setFestival }) {
                 if (rooms[roomId].code === joinRoomCode) {
                     roomExists = true;
                     const userRoomRef = ref(db, `rooms/${roomId}/users/${userId}`);
-                    set(userRoomRef, true)
+                    set(userRoomRef, user.photoURL)
                         .then(() => {
                             alert('🥳 Vous avez rejoint la room avec succès ! Sélectionnez-la pour commencer à swiper');
                             setIsJoinModalVisible(false);
@@ -154,7 +154,7 @@ export function Room({ userId, setRoom, setIdRoom, setFestival }) {
         set(roomRef, {
             name: roomName,
             code: roomCode,
-            users: { [userId]: true },
+            users: { [userId]: user.photoURL },
             festival: selectedFestival,
             artists: festivalArtists,
         }).then(() => {
