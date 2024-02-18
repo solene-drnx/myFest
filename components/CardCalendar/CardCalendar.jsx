@@ -27,16 +27,13 @@ export function CardCalendar({ artist, users, currentUserProfileImage, room, idR
                             if (snapshotScore.exists()) {
                                 const score = snapshotScore.val();
                                 if (score === 1 || score === 4) {
-                                    return roomUsers[userId]; // Retourner l'URL directement
+                                    return roomUsers[userId]; 
                                 }
                             }
                             return null;
                         });
 
                         const photoURLs = (await Promise.all(userProfilePromises)).filter(url => url !== null);
-
-                        // Inutile de précharger les images pour les utiliser dans des composants Image de React Native
-                        // Construisez l'état userProfiles avec les URLs récupérées
                         const profiles = photoURLs.map((url, index) => ({
                             userId: userIds[index],
                             photoURL: url,

@@ -39,13 +39,12 @@ export function Room({ userId, setRoom, setIdRoom, setFestival, user}) {
                                     scoresByArtist[artistName] = (scoresByArtist[artistName] || 0) + userArtists[artistName];
                                 });
                                 resolve();
-                            }, { onlyOnce: true }); // Utilisez { onlyOnce: true } pour annuler l'écoute après la première récupération
+                            }, { onlyOnce: true }); 
                         });
                     });
     
                     Promise.all(userScoreUpdates).then(() => {
                         console.log("scoresByArtist:", scoresByArtist);
-                        // Mise à jour du score total de la room
                         const roomArtistsRef = ref(db, `rooms/${selectedRoom}/artists`);
                         update(roomArtistsRef, scoresByArtist).then(() => {
                             console.log("Scores de la room mis à jour avec succès.");
@@ -53,9 +52,9 @@ export function Room({ userId, setRoom, setIdRoom, setFestival, user}) {
                             console.error("Erreur lors de la mise à jour des scores de la room :", error);
                         });
                     });
-                }, { onlyOnce: true }); // Utilisez { onlyOnce: true } ici aussi
+                }, { onlyOnce: true }); 
     
-            }, { onlyOnce: true }); // Et ici pour s'assurer que l'écoute est annulée après la première récupération
+            }, { onlyOnce: true }); 
         }
     }, [selectedRoom]);
     
@@ -99,7 +98,7 @@ export function Room({ userId, setRoom, setIdRoom, setFestival, user}) {
             setRoomItems(userRooms);
         });
 
-        return () => unsubscribe(); // Nettoyage du listener
+        return () => unsubscribe(); 
     }, [userId, setRoom]);
 
     const joinRoomWithCode = () => {
@@ -126,7 +125,7 @@ export function Room({ userId, setRoom, setIdRoom, setFestival, user}) {
                             alert('Erreur lors de la tentative de rejoindre la room.');
                             console.error("Erreur :", error);
                         });
-                    break; // Sortie de la boucle une fois la room trouvée
+                    break; 
                 }
             }
             if (!roomExists) {
@@ -263,10 +262,10 @@ export function Room({ userId, setRoom, setIdRoom, setFestival, user}) {
                 </View>
             </Modal>
             {open ? (
-                <View style={{ height: 50 }}>
+                <View style={{ height: 50, zIndex:1 }}>
                 </View>
             ) : (
-                <View style={{ flexDirection: "row", marginHorizontal: 5, marginTop: 10 }}>
+                <View style={{ flexDirection: "row", marginHorizontal: 5, marginTop: 10, zIndex: 1 }}>
                     <TouchableOpacity onPress={() => setIsModalVisible(true)} style={styles.buttonRoom}>
                         <Text style={styles.buttonRoomText}>Créer une room</Text>
                     </TouchableOpacity>
@@ -281,7 +280,8 @@ export function Room({ userId, setRoom, setIdRoom, setFestival, user}) {
 
 const styles = StyleSheet.create({
     container: {
-        marginHorizontal: 10
+        marginHorizontal: 10,
+        zIndex: 3,
     },
     picker: {
         width: 200,
