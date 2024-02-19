@@ -102,6 +102,32 @@ export function CardScreen({ indexCard, setIndexCard, setArtists, genresFav, set
         }
     };
 
+    const updateGenresFavForRoom = async () => {
+        const db = getDatabase();
+        const roomRef = ref(db, `rooms/${idRoom}/users`);
+        const snapshot = await get(roomRef);
+        if (snapshot.exists()) {
+            const usersInRoom = snapshot.val();
+            const genresFavTotals = {};
+            for (const userId of Object.keys(usersInRoom)) {
+                const userGenresFavRef = ref(db, `usersData/${userId}/${festival.db}/genresFavoris`);
+                const userGenresFavSnapshot = await get(userGenresFavRef);
+                if (userGenresFavSnapshot.exists()) {
+                    const userGenresFav = userGenresFavSnapshot.val();
+                    for (const genre in userGenresFav) {
+                        if (genresFavTotals[genre]) {
+                            genresFavTotals[genre] += userGenresFav[genre];
+                        } else {
+                            genresFavTotals[genre] = userGenresFav[genre];
+                        }
+                    }
+                }
+            }
+            const roomGenresFavRef = ref(db, `rooms/${idRoom}/genresFav`);
+            await set(roomGenresFavRef, genresFavTotals);
+        }
+    };
+
     const enregistrerIndexCard = async (nouvelIndex) => {
         const auth = getAuth();
         const user = auth.currentUser;
@@ -152,12 +178,12 @@ export function CardScreen({ indexCard, setIndexCard, setArtists, genresFav, set
         const auth = getAuth();
         const currentUser = auth.currentUser;
         const db = getDatabase();
-    
+
         if (!currentUser) {
             console.log("Aucun utilisateur connecté.");
             return;
         }
-    
+
         if (!room) {
             setArtists(currentArtists => currentArtists.map(artist => {
                 if (artist.nom === artistName) {
@@ -166,29 +192,29 @@ export function CardScreen({ indexCard, setIndexCard, setArtists, genresFav, set
                 return artist;
             }));
             await enregistrerDonneesUtilisateur(artistName, increment);
-        } else { 
+        } else {
             await enregistrerDonneesUtilisateur(artistName, increment);
-    
+
             const roomUsersRef = ref(db, `rooms/${idRoom}/users`);
             const usersSnapshot = await get(roomUsersRef);
             if (!usersSnapshot.exists()) {
                 console.log("Aucun utilisateur trouvé dans la room.");
                 return;
             }
-    
+
             const users = usersSnapshot.val();
             const scoresByArtist = {};
-    
+
             for (const userId of Object.keys(users)) {
                 const userArtistsRef = ref(db, `usersData/${userId}/${festival.db}/scores`);
                 const userSnapshot = await get(userArtistsRef);
                 const userArtists = userSnapshot.val() || {};
-    
+
                 for (const [artistName, score] of Object.entries(userArtists)) {
                     scoresByArtist[artistName] = (scoresByArtist[artistName] || 0) + score;
                 }
             }
-    
+
             const roomArtistsRef = ref(db, `rooms/${idRoom}/artists`);
             await update(roomArtistsRef, scoresByArtist);
             console.log("Scores de la room mis à jour avec succès.");
@@ -196,12 +222,12 @@ export function CardScreen({ indexCard, setIndexCard, setArtists, genresFav, set
             await resetOrFetchMultyUser();
         }
     };
-    
+
     const resetOrFetchMultyUser = async () => {
         const db = getDatabase();
         const roomRef = ref(db, `rooms/${idRoom}`);
         const snapshot = await get(roomRef);
-    
+
         if (snapshot.exists()) {
             const roomData = snapshot.val();
             const updatedArtists = ARTISTS.map(artist => {
@@ -213,7 +239,7 @@ export function CardScreen({ indexCard, setIndexCard, setArtists, genresFav, set
             console.log("Les données de la room n'existent pas ou ont été supprimées.");
         }
     };
-    
+
 
     const swipe = useRef(new Animated.ValueXY()).current;
     const panResponser = PanResponder.create({
@@ -257,7 +283,6 @@ export function CardScreen({ indexCard, setIndexCard, setArtists, genresFav, set
         swipe.setValue({ x: 0, y: 0 });
     }, [setData, setIndexCard, swipe, indexCard]);
 
-
     const ajoutGenre = (artistGenres, increment) => {
         setGenreFav(currentGenres => {
             const updatedGenres = { ...currentGenres };
@@ -270,7 +295,11 @@ export function CardScreen({ indexCard, setIndexCard, setArtists, genresFav, set
             });
             return updatedGenres;
         });
+
         enregistrerGenreFav(genresFav);
+        if (room === true) {
+            updateGenresFavForRoom();
+        }
     };
 
 

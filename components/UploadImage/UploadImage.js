@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { View, Text, StyleSheet, TouchableOpacity, Image, Alert } from "react-native";
 import * as ImagePicker from "expo-image-picker";
 import { getStorage, ref as storageRef, uploadBytes, getDownloadURL } from "firebase/storage";
-import { auth } from "../../firebase"; // Assuming this is your new firebase.js path
+import { auth } from "../../firebase"; 
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import * as FileSystem from "expo-file-system";
 
@@ -11,7 +11,6 @@ const UploadImage = () => {
     const [uploading, setUploading] = useState(false);
 
     const pickImage = async () => {
-        // no permissions request is necessary for launching the image library
         let result = await ImagePicker.launchImageLibraryAsync({
             mediaTypes: ImagePicker.MediaTypeOptions.All,
             allowsEditing: true,
@@ -24,8 +23,6 @@ const UploadImage = () => {
         }
     };
 
-    // Upload media files
-    // Correct usage of storageRef from Firebase storage
     const uploadImage = async () => {
         if (image == null) {
             return;
@@ -35,8 +32,7 @@ const UploadImage = () => {
         const filename = uri.substring(uri.lastIndexOf('/') + 1);
         const storage = getStorage();
         const blob = await (await fetch(uri)).blob();
-        // Rename the variable to avoid conflict with the imported storageRef
-        const imageRef = storageRef(storage, `images/${filename}`); // Renamed variable here
+        const imageRef = storageRef(storage, `images/${filename}`); 
 
         uploadBytes(imageRef, blob)
             .then((snapshot) => {
@@ -44,7 +40,6 @@ const UploadImage = () => {
             })
             .then((downloadURL) => {
                 console.log(`File available at: ${downloadURL}`);
-                // Here you can set the download URL to the user's profile or state
                 setUploading(false);
                 Alert.alert('Image uploaded!');
                 setImage(null);

@@ -9,7 +9,6 @@ const DropdownMenu = ({ setFestival, setRoom }) => {
     const [items, setItems] = useState([
         { label: 'Solidays 2023', value: FESTIVALS.solidays },
         { label: 'WeLoveGreen 2023', value: FESTIVALS.weLoveGreen2023 },
-        // Ajoutez d'autres options ici
     ]);
 
     useEffect(() => {

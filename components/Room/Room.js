@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Text, View, StyleSheet, TouchableOpacity, Modal, Button, Platform, TextInput } from "react-native";
 import { getDatabase, ref, onValue, set, push, update } from "firebase/database";
-import { FESTIVALS, ARTISTS } from '../../constant';
+import { FESTIVALS, ARTISTS, GENRES } from '../../constant';
 import DropDownPicker from 'react-native-dropdown-picker';
 import { fetchSignInMethodsForEmail } from 'firebase/auth';
 
@@ -44,7 +44,6 @@ export function Room({ userId, setRoom, setIdRoom, setFestival, user}) {
                     });
     
                     Promise.all(userScoreUpdates).then(() => {
-                        console.log("scoresByArtist:", scoresByArtist);
                         const roomArtistsRef = ref(db, `rooms/${selectedRoom}/artists`);
                         update(roomArtistsRef, scoresByArtist).then(() => {
                             console.log("Scores de la room mis à jour avec succès.");
@@ -139,23 +138,29 @@ export function Room({ userId, setRoom, setIdRoom, setFestival, user}) {
             alert('Veuillez sélectionner un festival et entrer un nom de room valide (max 20 caractères).');
             return;
         }
-
+    
         const festivalArtists = ARTISTS.filter(artist => artist.infoFestival.festival.db === selectedFestival)
             .reduce((acc, artist) => {
                 acc[artist.nom] = 0;
                 return acc;
             }, {});
-
+    
+        const genresFavInit = Object.keys(GENRES).reduce((acc, genre) => {
+            acc[GENRES[genre]] = 0; 
+            return acc;
+        }, {});
+    
         const db = getDatabase();
         const roomRef = push(ref(db, 'rooms'));
         const roomCode = generateRoomCode();
-
+    
         set(roomRef, {
             name: roomName,
             code: roomCode,
             users: { [userId]: user.photoURL },
             festival: selectedFestival,
             artists: festivalArtists,
+            genresFav: genresFavInit, 
         }).then(() => {
             alert(`La room ${roomName} a été créée avec succès. \nCode de la room : ${roomCode}`);
         }).catch((error) => {
@@ -163,6 +168,7 @@ export function Room({ userId, setRoom, setIdRoom, setFestival, user}) {
             alert("Erreur lors de la création de la room. Veuillez réessayer.");
         });
     }
+    
 
     function generateRoomCode() {
         return Math.random().toString(36).substring(2, 7).toUpperCase();

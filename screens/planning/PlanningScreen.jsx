@@ -9,6 +9,7 @@ import { getDatabase, ref, get } from "firebase/database";
 
 export function PlanningScreen({ artists, genresFav, users, currentUser, festival, room, idRoom, setArtists }) {
     const [dateSelected, setDateSelected] = useState("jour1");
+    const [genresFavRoom, setGenresFavRoom] = useState({});
     let artistsSorted = artists;
 
     useEffect(() => {
@@ -36,9 +37,34 @@ export function PlanningScreen({ artists, genresFav, users, currentUser, festiva
 
         if (room===true) {
             resetOrFetchMultyUser();
+            fetchGenresFavRoom();
             artistsSorted = artists;
         }
     }, [currentUser, idRoom, room])
+
+    const fetchGenresFavRoom = async () => {
+        if (!idRoom) {
+            console.log("Aucun idRoom fourni, impossible de récupérer les genres favoris de la room.");
+            return;
+        }
+    
+        const db = getDatabase();
+        const genresFavRef = ref(db, `rooms/${idRoom}/genresFav`);
+    
+        try {
+            const snapshot = await get(genresFavRef);
+            if (snapshot.exists()) {
+                const genresFavRoom = snapshot.val();
+                console.log("Genres favoris de la room récupérés avec succès :", genresFavRoom);
+                setGenresFavRoom(genresFavRoom);
+            } else {
+                console.log("Aucun genre favori trouvé pour cette room.");
+            }
+        } catch (error) {
+            console.error("Erreur lors de la récupération des genres favoris de la room :", error);
+        }
+    };
+    
 
     function choisirCarteSurGenres(cardA, cardB, genreFav) {
         const scoreA = cardA.genre.reduce((acc, genre) => acc + (genreFav[genre] || 0), 0) / cardA.genre.length;
@@ -52,7 +78,6 @@ export function PlanningScreen({ artists, genresFav, users, currentUser, festiva
     }
 
     function triArtistParScore(artists) {
-        // Tri initial par heure de début pour s'assurer que les artistes soient dans l'ordre chronologique
         artists.sort((a, b) => {
             const minutesA = (a.debut.heure >= 6 ? a.debut.heure : a.debut.heure + 24) * 60 + a.debut.minute;
             const minutesB = (b.debut.heure >= 6 ? b.debut.heure : b.debut.heure + 24) * 60 + b.debut.minute;
@@ -65,8 +90,12 @@ export function PlanningScreen({ artists, genresFav, users, currentUser, festiva
             if (i > 0) {
                 const previous = result[result.length - 1];
                 if (previous.debut.heure === current.debut.heure && previous.debut.minute === current.debut.minute) {
+                    let bestMatch = []; 
                     if (previous.score === current.score) {
-                        const bestMatch = choisirCarteSurGenres(previous, current, genresFav);
+                        bestMatch = room === false
+                        ? choisirCarteSurGenres(previous, current, genresFav)
+                        : choisirCarteSurGenres(previous, current, genresFavRoom);
+                        
                         if (bestMatch.length === 2) {
                             result.pop();
                             result.push(...bestMatch);

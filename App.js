@@ -14,7 +14,7 @@ import LoadingScreen from './screens/loadingScreen/LoadingScreen';
 import ConnexionScreen from './screens/connexion/ConnexionScreen';
 import InscriptionScreen from './screens/inscription/InscriptionScreen';
 import { getAuth, onAuthStateChanged } from "firebase/auth";
-import { getDatabase, ref, get } from "firebase/database";
+import { getDatabase, ref, get, set } from "firebase/database";
 
 
 export default function App() {
@@ -129,11 +129,41 @@ export default function App() {
       }
     }; 
 
+    const updateGenresFavForRoom = async () => {
+      if (currentUser) {
+        const db = getDatabase();
+        const roomRef = ref(db, `rooms/${idRoom}/users`);
+        const snapshot = await get(roomRef);
+        if (snapshot.exists()) {
+          const usersInRoom = snapshot.val();
+          const genresFavTotals = {};
+          for (const userId of Object.keys(usersInRoom)) {
+            const userGenresFavRef = ref(db, `usersData/${userId}/${festival.db}/genresFavoris`);
+            const userGenresFavSnapshot = await get(userGenresFavRef);
+            if (userGenresFavSnapshot.exists()) {
+              const userGenresFav = userGenresFavSnapshot.val();
+              for (const genre in userGenresFav) {
+                if (genresFavTotals[genre]) {
+                  genresFavTotals[genre] += userGenresFav[genre];
+                } else {
+                  genresFavTotals[genre] = userGenresFav[genre];
+                }
+              }
+            }
+          }
+          const roomGenresFavRef = ref(db, `rooms/${idRoom}/genresFav`);
+          await set(roomGenresFavRef, genresFavTotals);
+        }
+      }
+    };
+    
+
     if (room === false) {
       resetOrFetchUserData();
     } else {
       resetOrFetchIndex();
       resetOrFetchMultyUser();
+      updateGenresFavForRoom();
     }
     
   }, [festival, currentUser, idRoom]);
