@@ -22,6 +22,7 @@ export default function App() {
     "Montserrat-Black": montserratBlack,
     "Montserrat-Medium": montserratMedium,
   });
+
   const [navSelectionne, setNavSelectionne] = useState("loading");
   const [currentUser, setCurrentUser] = useState(null);
   const [artists, setArtists] = useState(ARTISTS);

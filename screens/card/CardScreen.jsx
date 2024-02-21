@@ -10,7 +10,7 @@ import { getAuth } from "firebase/auth";
 
 export function CardScreen({ indexCard, setIndexCard, setArtists, genresFav, setGenreFav, festival, room, idRoom, artists }) {
     const [data, setData] = useState([]);
-    const [loading, setLoading] = useState(true);
+    const [loading, setLoading] = useState(true); 
 
     useEffect(() => {
         const fetchIndexCard = async () => {
